@@ -1,91 +1,7 @@
 from PIL import Image, ImageDraw
-import random
-import colorsys
 import math
 import copy
-
-
-class RGB:
-
-    min_value = 0
-    max_value = 255
-    alpha_max = 1
-    
-    def __init__(self, red, green, blue, alpha=1):
-        if (not (RGB.min_value <= red <= RGB.max_value)) \
-                or (not (RGB.min_value <= green <= RGB.max_value)) \
-                or (not (RGB.min_value <= blue <= RGB.max_value)):
-            raise ValueError('RGB values must be ints in range [0, 255]!')
-
-        self.red = red
-        self.green = green
-        self.blue = blue
-        self.alpha = alpha
-
-    def output_rgb(self):
-        to_return = (self.red, self.green, self.blue)
-        return to_return
-
-    def output_rgb_with_alpha(self):
-        to_return = (self.red, self.green, self.blue, self.alpha)
-        return to_return
-
-    def to_hsv(self):
-        red = self.red / 255
-        green = self.green / 255
-        blue = self.blue / 255
-
-        hsv = colorsys.rgb_to_hsv(red, green, blue)
-
-        hue = hsv[0] * 360
-        saturation = hsv[1] * 100
-        value = hsv[2] * 100
-
-        return HSV(hue, saturation, value, self.alpha)
-
-    @staticmethod
-    def random_rgb():
-        red = random.randint(RGB.min_value, RGB.max_value)
-        green = random.randint(RGB.min_value, RGB.max_value)
-        blue = random.randint(RGB.min_value, RGB.max_value)
-        return RGB(red, green, blue)
-
-    @staticmethod
-    def random_rgb_with_alpha():
-        red = random.randint(RGB.min_value, RGB.max_value)
-        green = random.randint(RGB.min_value, RGB.max_value)
-        blue = random.randint(RGB.min_value, RGB.max_value)
-        alpha = random.uniform(RGB.min_value, RGB.max_alpha_value)
-        return RGB(red, green, blue, alpha)
-
-
-class HSV:
-    def __init__(self, hue, saturation, value, alpha=1):
-        self.hue = hue
-        self.saturation = saturation
-        self.value = value
-        self.alpha = alpha
-
-    def output_to_string(self):
-        to_return = f'hsv({self.hue}, {self.saturation}%, {self.value}%)'
-        return to_return
-
-    def output_hsv_with_alpha(self):
-        to_return = (self.hue, self.saturation, self.value, self.alpha)
-        return to_return
-
-    def to_rgb(self):
-        hue = self.hue / 360
-        saturation = self.saturation / 100
-        value = self.value / 100
-
-        rgb = colorsys.hsv_to_rgb(hue, saturation, value)
-
-        red = round(rgb[0] * 255)
-        green = round(rgb[1] * 255)
-        blue = round(rgb[2] * 255)
-
-        return RGB(red, green, blue, self.alpha)
+from src import RGB, HSV
 
 
 def create_color_static(wid, hgt):
@@ -99,10 +15,6 @@ def create_color_static(wid, hgt):
     to_render = Image.new('RGB', (wid, hgt))
     to_render.putdata(pixels)
     return to_render
-
-
-def linear_interpolation_at_t(start, end, t):
-    return start + ((end - start) * t)
 
 
 def x_colors_gradient_over_n(list_of_colors, n, hsv=False):
@@ -162,7 +74,7 @@ def x_colors_gradient_over_n(list_of_colors, n, hsv=False):
     return gradient_values
 
 
-def rect_gradient(list_of_colors, width, height, hsv=False):
+def line_gradient(list_of_colors, width, height, hsv=False):
     results = x_colors_gradient_over_n(list_of_colors, width, hsv)
 
     to_render = Image.new('RGB', (width, height))
@@ -175,8 +87,9 @@ def rect_gradient(list_of_colors, width, height, hsv=False):
 
 
 def square_gradient(list_of_colors, length, hsv=False):
-    radius = int(math.floor(length / 2))
-    if len(colors) > radius:
+    radius = math.ceil(length / 2)
+
+    if len(list_of_colors) > radius:
         raise ValueError('')
 
     gradient_values = x_colors_gradient_over_n(list_of_colors, radius, hsv)
@@ -188,16 +101,58 @@ def square_gradient(list_of_colors, length, hsv=False):
     x1 = x0 + 1
     for i in range(radius):
         to_draw.rectangle([x0, x0, x1, x1], outline=gradient_values[i])
-        print(x0, x1)
         x0 -= 1
         x1 += 1
+
     return to_render
 
 
-a = RGB(255, 255, 0)
-b = RGB(153, 76, 0)
-c = RGB(0, 0, 204)
+def rect_gradient(list_of_colors, width, height, hsv=False):
+    if width < height:
+        shorter_radius = math.ceil(width / 2)
+        longer_radius = math.ceil(height / 2)
+        to_render = Image.new('RGB', (height, width), (255, 255, 255))
+    elif width > height:
+        shorter_radius = math.ceil(height / 2)
+        longer_radius = math.ceil(width / 2)
+        to_render = Image.new('RGB', (width, height), (255, 255, 255))
+    else:
+        return square_gradient(list_of_colors, width, hsv)
+
+    to_draw = ImageDraw.Draw(to_render)
+    gradient_values = x_colors_gradient_over_n(list_of_colors, shorter_radius, hsv)
+    ratio = shorter_radius / longer_radius
+
+    x0 = longer_radius
+    y0 = shorter_radius
+    x1 = x0 + 1
+    y1 = y0 + 1
+
+    for i in range(longer_radius + 1):
+        cur_value = shorter_radius - y0
+        if cur_value >= len(gradient_values):
+            cur_value -= 1
+
+        to_draw.rectangle([x0, y0, x1, y1], outline=gradient_values[cur_value])
+
+        x0 -= 1
+        y0 = round(ratio * x0)
+        x1 += 1
+        y1 = round(ratio * x1)
+
+    if width < height:
+        return to_render.rotate(90, expand=True)
+
+    return to_render
+
+
+
+
+
+a = RGB.random_rgb()
+b = RGB.random_rgb()
+c = RGB.random_rgb()
 colors = [a, b, c]
-img = square_gradient(colors, 5000, False)
+img = rect_gradient(colors, 1500, 600)
 img.show()
 

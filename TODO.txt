@@ -1,9 +1,9 @@
 -Documentation for existing classes and methods
--Separate data classes into seperate file, add tests
+-Add tests
 -Add constructor guarantees into HSV class
 -Color scheme generation
 -Circle gradient generation
--Rectangle gradient generation
+-Seam carving implementations
 
--Most interesting seam removal
 -Most interesting part of picture
+-Image scaling with gradient
