@@ -17,7 +17,7 @@ def create_color_static(wid, hgt):
     return to_render
 
 
-def x_colors_gradient_over_n(list_of_colors, n, hsv=False):
+def gradient_of_x_colors_over_n(list_of_colors, n, hsv=False):
     x = len(list_of_colors)
 
     if n <= x - 1:
@@ -75,7 +75,7 @@ def x_colors_gradient_over_n(list_of_colors, n, hsv=False):
 
 
 def line_gradient(list_of_colors, width, height, hsv=False):
-    results = x_colors_gradient_over_n(list_of_colors, width, hsv)
+    results = gradient_of_x_colors_over_n(list_of_colors, width, hsv)
 
     to_render = Image.new('RGB', (width, height))
     to_draw = ImageDraw.Draw(to_render)
@@ -92,7 +92,7 @@ def square_gradient(list_of_colors, length, hsv=False):
     if len(list_of_colors) > radius:
         raise ValueError('')
 
-    gradient_values = x_colors_gradient_over_n(list_of_colors, radius, hsv)
+    gradient_values = gradient_of_x_colors_over_n(list_of_colors, radius, hsv)
 
     to_render = Image.new('RGB', (length, length), (255, 255, 255))
     to_draw = ImageDraw.Draw(to_render)
@@ -120,7 +120,7 @@ def rect_gradient(list_of_colors, width, height, hsv=False):
         return square_gradient(list_of_colors, width, hsv)
 
     to_draw = ImageDraw.Draw(to_render)
-    gradient_values = x_colors_gradient_over_n(list_of_colors, shorter_radius, hsv)
+    gradient_values = gradient_of_x_colors_over_n(list_of_colors, shorter_radius, hsv)
     ratio = shorter_radius / longer_radius
 
     x0 = longer_radius
@@ -146,13 +146,10 @@ def rect_gradient(list_of_colors, width, height, hsv=False):
     return to_render
 
 
-
-
-
-a = RGB.random_rgb()
-b = RGB.random_rgb()
-c = RGB.random_rgb()
+a = RGB(255, 0, 0)
+b = RGB(56, 98, 245)
+c = RGB(98, 0, 123)
 colors = [a, b, c]
-img = rect_gradient(colors, 1500, 600)
+img = rect_gradient(colors, 2000, 1250)
 img.show()
 

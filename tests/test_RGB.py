@@ -38,7 +38,9 @@ class TestRGB(TestCase):
         self.assertEqual(rgb.to_hsv().output_hsv_with_alpha(), (0, 0, 100, .5))
 
         rgb = RGB(54, 178, 213)
-        self.assertEqual(rgb.to_hsv().output_hsv_with_alpha(), (193, 74.648, 83.529, 1))
+        self.assertEqual(rgb.to_hsv().output_hsv_with_alpha(), (193.20754716981133, 74.64788732394366,
+                                                                83.52941176470588, 1))
 
         rgb = RGB(198, 34, 119, .34)
-        self.assertEqual(rgb.to_hsv().output_hsv_with_alpha(), (328, 82.828, 77.647, .34))
+        self.assertEqual(rgb.to_hsv().output_hsv_with_alpha(), (328.9024390243902, 82.82828282828282,
+                                                                77.64705882352942, 0.34))

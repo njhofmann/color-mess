@@ -71,8 +71,16 @@ class RGB:
 
 
 class HSV:
+    min_value = 0
+    max_hue = 360
+    max_sv = 100
 
     def __init__(self, hue, saturation, value, alpha=1):
+        if (not (HSV.min_value <= hue <= HSV.max_hue)
+        or (not (HSV.min_value <= saturation <= HSV.max_sv))
+        or (not (HSV.min_value <= value <= HSV.max_sv))):
+            raise ValueError('Hue must be in range [0, 360], saturation and value must be in range [0, 100]')
+        g
         self.hue = hue
         self.saturation = saturation
         self.value = value
