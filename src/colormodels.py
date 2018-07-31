@@ -1,5 +1,7 @@
 import colorsys
 import random
+import math
+
 
 class RGB:
     min_value = 0
@@ -30,11 +32,25 @@ class RGB:
         green = self.green / 255
         blue = self.blue / 255
 
-        hsv = colorsys.rgb_to_hsv(red, green, blue)
+        c_max = max(red, green, blue)
+        c_min = min(red, green, blue)
+        delta = c_max - c_min
 
-        hue = hsv[0] * 360
-        saturation = hsv[1] * 100
-        value = hsv[2] * 100
+        if delta == 0:
+            hue = 0
+        elif c_max == red:
+            hue = 60 * (((green - blue) / delta) % 6)
+        elif c_max == green:
+            hue = 60 * (((blue - red) / delta) + 2)
+        elif c_max == blue:
+            hue = 60 * (((red - green) / delta) + 4)
+
+        if c_max == 0:
+            saturation = 0
+        else:
+            saturation = (delta / c_max) * 100
+
+        value = c_max * 100
 
         return HSV(hue, saturation, value, self.alpha)
 
@@ -55,6 +71,7 @@ class RGB:
 
 
 class HSV:
+
     def __init__(self, hue, saturation, value, alpha=1):
         self.hue = hue
         self.saturation = saturation
@@ -70,14 +87,30 @@ class HSV:
         return to_return
 
     def to_rgb(self):
-        hue = self.hue / 360
+
+        hue = self.hue
         saturation = self.saturation / 100
         value = self.value / 100
 
-        rgb = colorsys.hsv_to_rgb(hue, saturation, value)
+        c = saturation * value
+        x = c * (1 - abs(((hue / 60) % 2) - 1))
+        m = value - c
 
-        red = round(rgb[0] * 255)
-        green = round(rgb[1] * 255)
-        blue = round(rgb[2] * 255)
+        if 0 <= hue < 60:
+            r, g, b = c, x, 0
+        elif 60 <= hue < 120:
+            r, g, b = x, c, 0
+        elif 120 <= hue < 180:
+            r, g, b = 0, c, x
+        elif 180 <= hue < 240:
+            r, g, b = 0, x, c
+        elif 240 <= hue < 300:
+            r, g, b = x, 0, c
+        elif 300 <= hue < 360:
+            r, g, b = c, 0, x
+
+        red = round((r + m) * 255)
+        green = round((g + m) * 255)
+        blue = round((b + m) * 255)
 
         return RGB(red, green, blue, self.alpha)
