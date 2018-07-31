@@ -146,10 +146,24 @@ def rect_gradient(list_of_colors, width, height, hsv=False):
     return to_render
 
 
+def circle_gradient(list_of_colors, radius):
+    gradient_values = gradient_of_x_colors_over_n(list_of_colors, radius)
+
+    diameter = 2 * radius
+    to_render = Image.new('RGB', (diameter, diameter), (255, 255, 255))
+    to_draw = ImageDraw.Draw(to_render)
+
+    for i in range(radius):
+        b = diameter - i - 1
+        to_draw.ellipse([i, i, b , b], fill=gradient_values[radius - i - 1])
+
+    return to_render
+
+
 a = RGB(255, 0, 0)
 b = RGB(56, 98, 245)
 c = RGB(98, 0, 123)
 colors = [a, b, c]
-img = rect_gradient(colors, 2000, 1250)
+img = circle_gradient(colors, 1000)
 img.show()
 
