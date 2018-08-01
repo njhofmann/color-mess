@@ -137,10 +137,3 @@ def master_gradient(list_of_colors, width, height, ellipse=False, hsv=False):
 
     return to_render
 
-
-a = RGB(255, 0, 0)
-b = RGB(56, 98, 245)
-c = RGB(98, 0, 123)
-colors = [a, b, c]
-img = rectangle_gradient(colors, 500, 800, True)
-img.show()

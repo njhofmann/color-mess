@@ -1,7 +1,6 @@
 -Documentation for existing classes and methods
--Color scheme generation
--Circle gradient generation
--Seam carving implementations
+-Parameter constraints
+-Color scheme generationgi
 
 -Most interesting part of picture
 -Image scaling with gradient
