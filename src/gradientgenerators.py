@@ -87,28 +87,23 @@ def line_gradient(list_of_colors, width, height, hsv=False):
 
 
 def square_gradient(list_of_colors, length, hsv=False):
-    radius = math.ceil(length / 2)
-
-    if len(list_of_colors) > radius:
-        raise ValueError('')
-
-    gradient_values = gradient_of_x_colors_over_n(list_of_colors, radius, hsv)
-
-    to_render = Image.new('RGB', (length, length), (255, 255, 255))
-    to_draw = ImageDraw.Draw(to_render)
-
-    x0 = radius - 1
-    x1 = x0 + 1
-    for i in range(radius):
-        to_draw.rectangle([x0, x0, x1, x1], outline=gradient_values[i])
-        x0 -= 1
-        x1 += 1
-
-    return to_render
+    return master_gradient(list_of_colors, length, length, False, hsv)
 
 
-def rect_gradient(list_of_colors, width, height, hsv=False):
-    if width < height:
+def rectangle_gradient(list_of_colors, width, height, hsv=False):
+    return master_gradient(list_of_colors, width, height, False, hsv)
+
+
+def circle_gradient(list_of_colors, radius, hsv=False):
+    return master_gradient(list_of_colors, radius * 2, radius * 2, True, hsv)
+
+
+def ellipse_gradient(list_of_colors, x_radius, y_radius, hsv=False):
+    return master_gradient(list_of_colors, x_radius * 2, y_radius * 2, True, hsv)
+
+
+def master_gradient(list_of_colors, width, height, ellipse=False, hsv=False):
+    if width <= height:
         shorter_radius = math.ceil(width / 2)
         longer_radius = math.ceil(height / 2)
         to_render = Image.new('RGB', (height, width), (255, 255, 255))
@@ -116,46 +111,29 @@ def rect_gradient(list_of_colors, width, height, hsv=False):
         shorter_radius = math.ceil(height / 2)
         longer_radius = math.ceil(width / 2)
         to_render = Image.new('RGB', (width, height), (255, 255, 255))
-    else:
-        return square_gradient(list_of_colors, width, hsv)
 
     to_draw = ImageDraw.Draw(to_render)
-    gradient_values = gradient_of_x_colors_over_n(list_of_colors, shorter_radius, hsv)
+    gradient_values = gradient_of_x_colors_over_n(list_of_colors, longer_radius, hsv)
     ratio = shorter_radius / longer_radius
 
-    x0 = longer_radius
-    y0 = shorter_radius
-    x1 = x0 + 1
-    y1 = y0 + 1
+    x0 = 0
+    y0 = 0
+    x1 = to_render.width
+    y1 = to_render.height
 
-    for i in range(longer_radius + 1):
-        cur_value = shorter_radius - y0
-        if cur_value >= len(gradient_values):
-            cur_value -= 1
+    for i in range(longer_radius):
+        coordinates = [x0, y0, x1, y1]
+        cur_color = gradient_values[longer_radius - i - 1]
 
-        to_draw.rectangle([x0, y0, x1, y1], outline=gradient_values[cur_value])
+        if ellipse:
+            to_draw.ellipse(coordinates, fill=cur_color)
+        else:
+            to_draw.rectangle(coordinates, cur_color)
 
-        x0 -= 1
-        y0 = round(ratio * x0)
-        x1 += 1
-        y1 = round(ratio * x1)
-
-    if width < height:
-        return to_render.rotate(90, expand=True)
-
-    return to_render
-
-
-def circle_gradient(list_of_colors, radius):
-    gradient_values = gradient_of_x_colors_over_n(list_of_colors, radius)
-
-    diameter = 2 * radius
-    to_render = Image.new('RGB', (diameter, diameter), (255, 255, 255))
-    to_draw = ImageDraw.Draw(to_render)
-
-    for i in range(radius):
-        b = diameter - i - 1
-        to_draw.ellipse([i, i, b , b], fill=gradient_values[radius - i - 1])
+        x0 += 1
+        y0 = round(x0 * ratio)
+        x1 -= 1
+        y1 = round(x1 * ratio)
 
     return to_render
 
@@ -164,6 +142,5 @@ a = RGB(255, 0, 0)
 b = RGB(56, 98, 245)
 c = RGB(98, 0, 123)
 colors = [a, b, c]
-img = circle_gradient(colors, 1000)
+img = rectangle_gradient(colors, 500, 800, True)
 img.show()
-
