@@ -1,5 +1,7 @@
 from src.gradientgenerators import *
 from src.colorschemagenerators import *
+from src.colormodels import *
 
-start = RGB.random_rgb()
-view_schema(n_colors_over_value_range(start, 5, 20))
+rgb = RGB.random_rgb()
+print(rgb.output())
+print(rgb.to_lab().output())

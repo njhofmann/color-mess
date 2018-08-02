@@ -6,16 +6,16 @@ class TestRGB(TestCase):
 
     def test_output_rgb(self):
         rgb = RGB(0, 0, 0)
-        self.assertEqual(rgb.output_rgb(), (0, 0, 0))
+        self.assertEqual(rgb.output(), (0, 0, 0))
 
         rgb = RGB(255, 255, 255)
-        self.assertEqual(rgb.output_rgb(), (255, 255, 255))
+        self.assertEqual(rgb.output(), (255, 255, 255))
 
         rgb = RGB(54, 178, 213)
-        self.assertEqual(rgb.output_rgb(), (54, 178, 213))
+        self.assertEqual(rgb.output(), (54, 178, 213))
 
         rgb = RGB(198, 34, 119)
-        self.assertEqual(rgb.output_rgb(), (198, 34, 119))
+        self.assertEqual(rgb.output(), (198, 34, 119))
 
     def test_output_rgb_with_alpha(self):
         rgb = RGB(0, 0, 0, 1)

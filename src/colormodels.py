@@ -8,7 +8,7 @@ class RGB:
     max_value = 255
     alpha_max = 1
 
-    def __init__(self, red, green, blue, alpha=1):
+    def __init__(self, red, green, blue):
         if (not (RGB.min_value <= red <= RGB.max_value)) \
                 or (not (RGB.min_value <= green <= RGB.max_value)) \
                 or (not (RGB.min_value <= blue <= RGB.max_value)):
@@ -17,21 +17,15 @@ class RGB:
         self.red = red
         self.green = green
         self.blue = blue
-        self.alpha = alpha
 
-    def output_rgb(self):
+    def output(self):
         to_return = (self.red, self.green, self.blue)
-        return to_return
-
-    def output_rgb_with_alpha(self):
-        to_return = (self.red, self.green, self.blue, self.alpha)
         return to_return
 
     def to_hsv(self):
         red = self.red / 255
         green = self.green / 255
         blue = self.blue / 255
-
         c_max = max(red, green, blue)
         c_min = min(red, green, blue)
         delta = c_max - c_min
@@ -52,7 +46,53 @@ class RGB:
 
         value = c_max * 100
 
-        return HSV(hue, saturation, value, self.alpha)
+        return HSV(hue, saturation, value)
+
+    def to_lab(self):
+        red = self.red / 255.0
+        green = self.green / 255.0
+        blue = self.blue / 255.0
+
+        def xyz_mid_transform(var):
+            if var > 0.04045:
+                var = (((var + 0.055) / 1.055) ** 2.4)
+            else:
+                var /= 12.92
+
+            var *= 100.0
+
+            return var
+
+        red = xyz_mid_transform(red)
+        green = xyz_mid_transform(green)
+        blue = xyz_mid_transform(blue)
+
+        x = ((red * .4124564) + (green * .3575761) + (blue * .1804375))
+        y = ((red * .2126729) + (green * .7151522) + (blue * .0721750))
+        z = ((red * .0193339) + (green * .1191920) + (blue * .9503041))
+        print(x, y, z)
+        x /= 95.047
+        y /= 100
+        z /= 108.883
+
+        def lab_mid_transform(var):
+            if var > .008856:
+                var **= (1/3)
+            else:
+                var = (var * 7.787) + (16 / 116)
+
+            return var
+
+        x = lab_mid_transform(x)
+        y = lab_mid_transform(y)
+        z = lab_mid_transform(z)
+
+        light = (116 * y) - 16
+        a = 500 * (x - y)
+        b = 200 * (y - z)
+
+        return LAB(light, a, b)
+
 
     @staticmethod
     def random_rgb():
@@ -61,37 +101,30 @@ class RGB:
         blue = random.randint(RGB.min_value, RGB.max_value)
         return RGB(red, green, blue)
 
-    @staticmethod
-    def random_rgb_with_alpha():
-        red = random.randint(RGB.min_value, RGB.max_value)
-        green = random.randint(RGB.min_value, RGB.max_value)
-        blue = random.randint(RGB.min_value, RGB.max_value)
-        alpha = random.uniform(RGB.min_value, RGB.max_alpha_value)
-        return RGB(red, green, blue, alpha)
-
 
 class HSV:
     min_value = 0
     max_hue = 360
     max_sv = 100
 
-    def __init__(self, hue, saturation, value, alpha=1):
-        if (not (HSV.min_value <= hue <= HSV.max_hue)
-                    or (not (HSV.min_value <= saturation <= HSV.max_sv))
-                or (not (HSV.min_value <= value <= HSV.max_sv))):
-            raise ValueError('Hue must be in range [0, 360], saturation and value must be in range [0, 100]')
+    def __init__(self, hue, saturation, value):
+        if not (HSV.min_value <= hue <= HSV.max_hue):
+            raise ValueError('Hue must be in range [0, 360]')
+        elif not (HSV.min_value <= saturation <= HSV.max_sv):
+            raise ValueError('Saturation must be in range [0, 100]!')
+        elif not (HSV.min_value <= value <= HSV.max_sv):
+            raise ValueError('Value must be in range [0, 100]!')
 
         self.hue = hue
         self.saturation = saturation
         self.value = value
-        self.alpha = alpha
+
+    def output(self):
+        to_return = (self.hue, self.saturation, self.value)
+        return to_return
 
     def output_to_string(self):
         to_return = f'hsv({self.hue}, {self.saturation}%, {self.value}%)'
-        return to_return
-
-    def output_hsv_with_alpha(self):
-        to_return = (self.hue, self.saturation, self.value, self.alpha)
         return to_return
 
     def to_rgb(self):
@@ -121,4 +154,28 @@ class HSV:
         green = round((g + m) * 255)
         blue = round((b + m) * 255)
 
-        return RGB(red, green, blue, self.alpha)
+        return RGB(red, green, blue)
+
+    def to_lab(self):
+        pass
+
+
+class LAB:
+
+    def __init__(self, light, a, b):
+        if not (0 <= light <= 100):
+            raise ValueError('Light must in range [0, 100]!')
+
+        self.light = light
+        self.a = a
+        self.b = b
+
+    def output(self):
+        to_return = (self.light, self.a, self.b)
+        return to_return
+
+    def to_rgb(self):
+        pass
+
+    def to_hsv(self):
+        pass

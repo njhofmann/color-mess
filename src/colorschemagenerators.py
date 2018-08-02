@@ -2,6 +2,20 @@ from PIL import Image, ImageDraw
 from src.colormodels import RGB, HSV
 
 
+def n_colors_over_saturation_range(starting_color, n, saturation):
+    starting_color = starting_color.to_hsv()
+
+    increment = saturation / (n - 1)
+    cur_sat = starting_color.saturation
+    results = []
+    for idx in range(n):
+        to_add = HSV(starting_color.hue, starting_color.saturation, cur_sat)
+        results.append(to_add.to_rgb())
+        cur_sat = (cur_sat + increment) % 100
+
+    return results
+
+
 def n_colors_over_value_range(starting_color, n, value):
     starting_color = starting_color.to_hsv()
 
@@ -58,6 +72,6 @@ def view_schema(clrs):
     draw = ImageDraw.Draw(img)
 
     for idx, color in enumerate(clrs):
-        draw.rectangle([idx * var, 0, (idx + 1) * var, var], fill=color.output_rgb())
+        draw.rectangle([idx * var, 0, (idx + 1) * var, var], fill=color.output())
 
     img.show()

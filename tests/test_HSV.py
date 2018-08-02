@@ -34,10 +34,10 @@ class TestHSV(TestCase):
         #self.assertEqual(hsv.to_rgb().output_rgb(), (255, 0, 4))
 
         hsv = HSV(0, 0, 0)
-        self.assertEqual(hsv.to_rgb().output_rgb(), (0, 0, 0))
+        self.assertEqual(hsv.to_rgb().output(), (0, 0, 0))
 
         hsv = HSV(250, .56, .87)
-        self.assertEqual(hsv.to_rgb().output_rgb(), (2, 2, 2))
+        self.assertEqual(hsv.to_rgb().output(), (2, 2, 2))
 
         hsv = HSV(132, .23, .98)
-        self.assertEqual(hsv.to_rgb().output_rgb(), (2, 2, 2))
+        self.assertEqual(hsv.to_rgb().output(), (2, 2, 2))

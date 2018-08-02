@@ -1,6 +1,3 @@
 -Documentation for existing classes and methods
 -Parameter constraints
--Color scheme generationgi
-
--Most interesting part of picture
--Image scaling with gradient
+-Color scheme generation

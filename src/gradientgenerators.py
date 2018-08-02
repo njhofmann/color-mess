@@ -66,10 +66,10 @@ def gradient_of_x_colors_over_n(list_of_colors, n, hsv=False):
                 to_add_blue = rounded_value_at_t(a.blue, b.blue, t)
                 to_add = RGB(to_add_red, to_add_green, to_add_blue)
 
-            gradient_values.append(to_add.output_rgb())
+            gradient_values.append(to_add.output())
 
             if idx == len(pairs) - 1 and i == temp - 1:
-                gradient_values.append(b.output_rgb())
+                gradient_values.append(b.output())
 
     return gradient_values
 
