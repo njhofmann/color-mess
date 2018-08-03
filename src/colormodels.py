@@ -2,6 +2,19 @@ import colorsys
 import random
 import math
 
+'''
+The conversion between an RGB value to a LAB value is not one to one, each conversion requires an intermediary 
+transformation to the XYZ color space, the XYZ color space depends on a specific illumination with its own set of 
+reference values and transformation variables. This model is built using the D65/2° standard illumination. References
+values are given below, transformation variables are marked in the respective methods.
+'''
+ref_x = 95.047
+ref_y = 100
+ref_z = 108.883
+
+# If a color space is to output a decimal, determines to what place that output should be to at max
+round_to = 4
+
 
 class RGB:
     min_value = 0
@@ -19,8 +32,10 @@ class RGB:
         self.blue = blue
 
     def output(self):
-        to_return = (self.red, self.green, self.blue)
-        return to_return
+        red = round(self.red)
+        green = round(self.green)
+        blue = round(self.blue)
+        return red, green, blue
 
     def to_hsv(self):
         red = self.red / 255
@@ -46,7 +61,9 @@ class RGB:
 
         value = c_max * 100
 
-        return HSV(hue, saturation, value)
+        to_return = HSV(hue, saturation, value)
+
+        return to_return
 
     def to_lab(self):
         red = self.red / 255.0
@@ -54,8 +71,8 @@ class RGB:
         blue = self.blue / 255.0
 
         def xyz_mid_transform(var):
-            if var > 0.04045:
-                var = (((var + 0.055) / 1.055) ** 2.4)
+            if var > .04045:
+                var = (((var + .055) / 1.055) ** 2.4)
             else:
                 var /= 12.92
 
@@ -67,13 +84,10 @@ class RGB:
         green = xyz_mid_transform(green)
         blue = xyz_mid_transform(blue)
 
-        x = ((red * .4124564) + (green * .3575761) + (blue * .1804375))
-        y = ((red * .2126729) + (green * .7151522) + (blue * .0721750))
-        z = ((red * .0193339) + (green * .1191920) + (blue * .9503041))
-
-        x /= 95.047
-        y /= 100
-        z /= 108.883
+        # RGB -> XYZ transformation variables
+        x = ((red * .4124564) + (green * .3575761) + (blue * .1804375)) / ref_x
+        y = ((red * .2126729) + (green * .7151522) + (blue * .0721750)) / ref_y
+        z = ((red * .0193339) + (green * .1191920) + (blue * .9503041)) / ref_z
 
         def lab_mid_transform(var):
             if var > .008856:
@@ -92,7 +106,6 @@ class RGB:
         b = 200 * (y - z)
 
         return LAB(light, a, b)
-
 
     @staticmethod
     def random_rgb():
@@ -115,20 +128,37 @@ class HSV:
         elif not (HSV.min_value <= value <= HSV.max_sv):
             raise ValueError('Value must be in range [0, 100]!')
 
-        self.hue = hue
-        self.saturation = saturation
-        self.value = value
+        # For testing purposes due to information lose when converting to other color formats
+        if value == 0:  #
+            self.hue = 0
+            self.saturation = 0
+            self.value = 0
+        elif saturation == 0:  #
+            self.hue = 0
+            self.saturation = 0
+            self.value = value
+        elif hue == 360:  #
+            self.hue = 0
+            self.saturation = saturation
+            self.value = value
+        else:
+            self.hue = hue
+            self.saturation = saturation
+            self.value = value
 
     def output(self):
-        to_return = (self.hue, self.saturation, self.value)
-        return to_return
+        hue = round(self.hue)
+        saturation = round(self.saturation)
+        value = round(self.value)
+        return hue, saturation, value
 
     def output_to_string(self):
-        to_return = f'hsv({self.hue}, {self.saturation}%, {self.value}%)'
-        return to_return
+        hue = round(self.hue, round_to)
+        saturation = round(self.saturation, round_to)
+        value = round(self.value, round_to)
+        return f'hsv({hue}, {saturation}%, {value}%)'
 
     def to_rgb(self):
-
         hue = self.hue
         saturation = self.saturation / 100
         value = self.value / 100
@@ -147,24 +177,34 @@ class HSV:
             r, g, b = 0, x, c
         elif 240 <= hue < 300:
             r, g, b = x, 0, c
-        elif 300 <= hue < 360:
+        else:
             r, g, b = c, 0, x
 
-        red = round((r + m) * 255)
-        green = round((g + m) * 255)
-        blue = round((b + m) * 255)
+        red = (r + m) * 255
+        green = ((g + m) * 255)
+        blue = ((b + m) * 255)
 
         return RGB(red, green, blue)
 
     def to_lab(self):
         rgb = self.to_rgb()
-        return rgb.to_lab()
+        to_return = rgb.to_lab()
+        return to_return
+
+    @staticmethod
+    def random_hsv():
+        hue = random.randint(HSV.min_value, HSV.max_hue)
+        saturation = random.randint(HSV.min_value, HSV.max_sv)
+        value = random.randint(HSV.min_value, HSV.max_sv)
+        return HSV(hue, saturation, value)
 
 
 class LAB:
+    max_light = 100
+    min_light = 0
 
     def __init__(self, light, a, b):
-        if not (0 <= light <= 100):
+        if not (LAB.min_light <= light <= LAB.max_light):
             raise ValueError('Light must in range [0, 100]!')
 
         self.light = light
@@ -172,8 +212,10 @@ class LAB:
         self.b = b
 
     def output(self):
-        to_return = (self.light, self.a, self.b)
-        return to_return
+        light = round(self.light, round_to)
+        a = round(self.a, round_to)
+        b = round(self.b, round_to)
+        return light, a, b
 
     def to_rgb(self):
         y = (self.light + 16) / 116
@@ -188,21 +230,18 @@ class LAB:
 
             return var
 
-        x = xyz_transform(x)
-        y = xyz_transform(y)
-        z = xyz_transform(z)
-
-        x *= 95.047
-        y *= 100
-        z *= 108.883
+        x = xyz_transform(x) * ref_x
+        y = xyz_transform(y) * ref_y
+        z = xyz_transform(z) * ref_z
 
         x /= 100
         y /= 100
         z /= 100
 
+        # XYZ -> RGB transformation variables
         red = (x * 3.2404542) + (y * -1.5371385) + (z * -.4985314)
         green = (x * -.9692660) + (y * 1.8760108) + (z * .0415560)
-        blue = (x * .0556434) + (y * .2040259) + (z * 1.0572252)
+        blue = (x * .0556434) + (y * -.2040259) + (z * 1.0572252)
 
         def rgb_transform(var):
             if var > .0031308:
@@ -218,8 +257,30 @@ class LAB:
         green = rgb_transform(green)
         blue = rgb_transform(blue)
 
+        if red < 0:
+            red = 0
+        elif 255 < red:
+            red = 255
+        elif green < 0:
+            green = 0
+        elif 255 < green:
+            green = 255
+        elif blue < 0:
+            blue = 0
+        elif 255 < blue:
+            blue = 255
+
         return RGB(red, green, blue)
 
     def to_hsv(self):
         rgb = self.to_rgb()
-        return rgb.to_hsv()
+        to_return = rgb.to_hsv()
+        return to_return
+
+    @staticmethod
+    def random_lab():
+        a_b_range = 128
+        light = random.randint(LAB.min_light, LAB.max_light)
+        a = random.randint(-a_b_range, a_b_range)
+        b = random.randint(-a_b_range, a_b_range)
+        return LAB(light, a, b)
