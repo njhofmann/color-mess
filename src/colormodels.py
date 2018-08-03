@@ -70,7 +70,7 @@ class RGB:
         x = ((red * .4124564) + (green * .3575761) + (blue * .1804375))
         y = ((red * .2126729) + (green * .7151522) + (blue * .0721750))
         z = ((red * .0193339) + (green * .1191920) + (blue * .9503041))
-        print(x, y, z)
+
         x /= 95.047
         y /= 100
         z /= 108.883
@@ -157,7 +157,8 @@ class HSV:
         return RGB(red, green, blue)
 
     def to_lab(self):
-        pass
+        rgb = self.to_rgb()
+        return rgb.to_lab()
 
 
 class LAB:
@@ -175,7 +176,50 @@ class LAB:
         return to_return
 
     def to_rgb(self):
-        pass
+        y = (self.light + 16) / 116
+        x = (self.a / 500) + y
+        z = y - (self.b / 200)
+
+        def xyz_transform(var):
+            if (var ** 3) > .008856:
+                var **= 3
+            else:
+                var = (var - 16 / 116) / 7.787
+
+            return var
+
+        x = xyz_transform(x)
+        y = xyz_transform(y)
+        z = xyz_transform(z)
+
+        x *= 95.047
+        y *= 100
+        z *= 108.883
+
+        x /= 100
+        y /= 100
+        z /= 100
+
+        red = (x * 3.2404542) + (y * -1.5371385) + (z * -.4985314)
+        green = (x * -.9692660) + (y * 1.8760108) + (z * .0415560)
+        blue = (x * .0556434) + (y * .2040259) + (z * 1.0572252)
+
+        def rgb_transform(var):
+            if var > .0031308:
+                var = 1.055 * (var ** (1 / 2.4)) - .055
+            else:
+                var *= 12.92
+
+            var *= 255
+
+            return var
+
+        red = rgb_transform(red)
+        green = rgb_transform(green)
+        blue = rgb_transform(blue)
+
+        return RGB(red, green, blue)
 
     def to_hsv(self):
-        pass
+        rgb = self.to_rgb()
+        return rgb.to_hsv()

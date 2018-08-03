@@ -2,6 +2,5 @@ from src.gradientgenerators import *
 from src.colorschemagenerators import *
 from src.colormodels import *
 
-rgb = RGB.random_rgb()
-print(rgb.output())
-print(rgb.to_lab().output())
+lab = LAB(34, 57, -89)
+print(lab.to_rgb().output())
