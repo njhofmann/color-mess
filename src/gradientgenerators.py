@@ -51,6 +51,7 @@ def diamond(image, coordinates, cur_color, vert, horz):
     to_draw = ImageDraw.Draw(image)
     to_draw.polygon(coordinates, fill=cur_color)
 
+
 def gradient_of_x_colors_over_n(list_of_colors, n, hsv=False, lab=False):
     x = len(list_of_colors)
 
@@ -128,37 +129,38 @@ def line_gradient(list_of_colors, width, height, hsv=False, lab=False):
     return to_render
 
 
-def even_diamond_gradient(list_of_colors, width, height, hsv=False, lab=False):
+def even_diamond_gradient(list_of_colors, width, height, fill_background=False, hsv=False, lab=False):
     def even_diamond(image, coordinates, cur_color):
         even = .5
         return diamond(image, coordinates, cur_color, even, even)
-    return master_gradient(list_of_colors, width, height, even_diamond, hsv, lab)
+
+    return master_gradient(list_of_colors, width, height, even_diamond, fill_background, hsv, lab)
 
 
-def diamond_gradient(list_of_colors, width, height, hsv=False, lab=False):
+def diamond_gradient(list_of_colors, width, height, fill_background=False, hsv=False, lab=False):
     def diamond_jewel(image, coordinates, cur_color):
         return diamond(image, coordinates, cur_color, .25, .75)
 
-    return master_gradient(list_of_colors, width, height, diamond_jewel, hsv, lab)
+    return master_gradient(list_of_colors, width, height, diamond_jewel, fill_background, hsv, lab)
 
 
-def square_gradient(list_of_colors, length, hsv=False, lab=False):
-    return master_gradient(list_of_colors, length, length, rectangle, hsv, lab)
+def square_gradient(list_of_colors, length, fill_background=False, hsv=False, lab=False):
+    return master_gradient(list_of_colors, length, length, rectangle, fill_background, hsv, lab)
 
 
-def rectangle_gradient(list_of_colors, width, height, hsv=False, lab=False):
-    return master_gradient(list_of_colors, width, height, rectangle, hsv, lab)
+def rectangle_gradient(list_of_colors, width, height,fill_background=False,  hsv=False, lab=False):
+    return master_gradient(list_of_colors, width, height, rectangle, fill_background, hsv, lab)
 
 
-def circle_gradient(list_of_colors, radius, hsv=False, lab=False):
-    return master_gradient(list_of_colors, radius * 2, radius * 2, ellipse, hsv, lab)
+def circle_gradient(list_of_colors, radius, fill_background=False, hsv=False, lab=False):
+    return master_gradient(list_of_colors, radius * 2, radius * 2, ellipse, fill_background, hsv, lab)
 
 
-def ellipse_gradient(list_of_colors, x_radius, y_radius, hsv=False, lab=False):
-    return master_gradient(list_of_colors, x_radius * 2, y_radius * 2, ellipse, hsv, lab)
+def ellipse_gradient(list_of_colors, x_radius, y_radius, fill_background=False, hsv=False, lab=False):
+    return master_gradient(list_of_colors, x_radius * 2, y_radius * 2, ellipse, fill_background, hsv, lab)
 
 
-def master_gradient(list_of_colors, width, height, shape, hsv=False, lab=False):
+def master_gradient(list_of_colors, width, height, shape, fill_background=False, hsv=False, lab=False):
     if width <= height:
         shorter_radius = math.ceil(width / 2)
         longer_radius = math.ceil(height / 2)
@@ -170,6 +172,9 @@ def master_gradient(list_of_colors, width, height, shape, hsv=False, lab=False):
 
     gradient_values = gradient_of_x_colors_over_n(list_of_colors, longer_radius, hsv, lab)
     ratio = shorter_radius / longer_radius
+
+    if fill_background:
+        to_render.paste(gradient_values[-1], [0, 0, to_render.size[0], to_render.size[1]])
 
     x0 = 0
     y0 = 0

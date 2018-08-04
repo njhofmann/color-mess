@@ -132,6 +132,13 @@ class RGB:
         blue = random.randint(RGB.min_value, RGB.max_value)
         return RGB(red, green, blue)
 
+    @staticmethod
+    def x_random_rbgs(n):
+        to_return = []
+        for i in range(n):
+            to_return.append(RGB.random_rgb())
+        return to_return
+
 
 class HSV:
     min_value = 0
