@@ -12,33 +12,35 @@ class TestConversions(TestCase):
     def test_rgb_to_hsv(self):
         for i in range(TestConversions.test_to):
             rgb = RGB.random_rgb()
-            self.assertEqual(rgb.output(), rgb.to_hsv().to_rgb().output())
+            other = rgb.to_hsv().to_rgb()
+            self.assertTrue(rgb.same_color(other))
 
     def test_hsv_to_rgb(self):
         for i in range(TestConversions.test_to):
             hsv = HSV.random_hsv()
-            self.assertEqual(hsv.output(), hsv.to_rgb().to_hsv().output())
+            other = hsv.to_rgb().to_hsv()
+            self.assertTrue(hsv.same_color(other))
 
     def test_rgb_to_lab(self):
         for i in range(TestConversions.test_to):
             rgb = RGB.random_rgb()
-            self.assertEqual(rgb.output(), rgb.to_lab().to_rgb().output())
+            other = rgb.to_lab().to_rgb()
+            self.assertTrue(rgb.same_color(other))
 
     def test_lab_to_rgb(self):
         for i in range(TestConversions.test_to):
             lab = LAB(48, -116, 5)
+            other = lab.to_rgb().to_lab()
             print(lab.output())
             print(lab.to_rgb().output())
             print(lab.to_rgb().to_lab().output())
-            self.assertEqual(lab.output(), lab.to_rgb().to_lab().output())
+            self.assertTrue(lab.same_color(other))
 
     def test_hsv_to_lab(self):
         for i in range(TestConversions.test_to):
-            hsv = HSV(137, 0, 56)
-            print(hsv.output())
-            print(hsv.to_lab().output())
-            print(hsv.to_lab().to_hsv().output(), '\n')
-            #self.assertEqual(hsv.output(), hsv.to_lab().to_hsv().output())
+            hsv = HSV.random_hsv()
+            other = hsv.to_lab().to_hsv()
+            self.assertTrue(hsv.same_color(other))
 
     def lab_to_hsv(self):
         pass

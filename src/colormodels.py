@@ -37,6 +37,21 @@ class RGB:
         blue = round(self.blue)
         return red, green, blue
 
+    def same_color(self, other):
+        def same_attributes(temp):
+            return self.output() == temp.output()
+
+        if isinstance(other, RGB):
+            return same_attributes(other)
+        elif isinstance(other, HSV):
+            rgb = other.to_rgb()
+            return same_attributes(rgb)
+        elif isinstance(other, LAB):
+            rgb = other.to_rgb()
+            return same_attributes(rgb)
+        else:
+            raise TypeError('Given input isn\'t a color of type RGb, HSV, or LAB!')
+
     def to_hsv(self):
         red = self.red / 255
         green = self.green / 255
@@ -129,15 +144,7 @@ class HSV:
             raise ValueError('Value must be in range [0, 100]!')
 
         # For testing purposes due to information lose when converting to other color formats
-        if value == 0:  #
-            self.hue = 0
-            self.saturation = 0
-            self.value = 0
-        elif saturation == 0:  #
-            self.hue = 0
-            self.saturation = 0
-            self.value = value
-        elif hue == 360:  #
+        if hue == 360:  #
             self.hue = 0
             self.saturation = saturation
             self.value = value
@@ -157,6 +164,30 @@ class HSV:
         saturation = round(self.saturation, round_to)
         value = round(self.value, round_to)
         return f'hsv({hue}, {saturation}%, {value}%)'
+
+    def same_color(self, other):
+        def same_attributes(temp):
+            a = self.output()
+            b = temp.output()
+
+            if a[2] == 0 and b[2] == 0:  # If their values are both zero, they are both black - hue and saturation
+                return True              # don't matter.
+            elif a[1] == 0 and b[1] == 0:  # If saturations are both zero, only thing to check is their values.
+                return a[2] == b[2]
+            else:
+                return a == b
+
+        if isinstance(other, HSV):
+            return same_attributes(other)
+        elif isinstance(other, RGB):
+            hsv = other.to_hsv()
+            return same_attributes(hsv)
+        elif isinstance(other, LAB):
+            hsv = other.to_hsv()
+            return same_attributes(hsv)
+        else:
+            raise TypeError('Given input isn\'t a color of type RGB, HSV, or LAB!')
+
 
     def to_rgb(self):
         hue = self.hue
@@ -212,10 +243,25 @@ class LAB:
         self.b = b
 
     def output(self):
-        light = round(self.light, round_to)
-        a = round(self.a, round_to)
-        b = round(self.b, round_to)
+        light = round(self.light)
+        a = round(self.a)
+        b = round(self.b)
         return light, a, b
+
+    def same_color(self, other):
+        def same_attributes(temp):
+            return self.output() == temp.output()
+
+        if isinstance(other, LAB):
+            return same_attributes(other)
+        elif isinstance(other, RGB):
+            lab = other.to_lab()
+            return same_attributes(lab)
+        elif isinstance(other, HSV):
+            lab = other.to_lab()
+            return same_attributes(lab)
+        else:
+            raise TypeError('Given input isn\'t a color of type RGB, HSV, or LAB!')
 
     def to_rgb(self):
         y = (self.light + 16) / 116
