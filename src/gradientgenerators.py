@@ -33,6 +33,24 @@ def ellipse(image, coordinates, cur_color):
     to_draw.ellipse(coordinates, fill=cur_color)
 
 
+def diamond(image, coordinates, cur_color, vert, horz):
+    x0 = coordinates[0]
+    y0 = coordinates[1]
+    x1 = coordinates[2]
+    y1 = coordinates[3]
+
+    horz_b = 1 - horz
+
+    a = (x0, y0 + (vert * (y1 - y0)))
+    b = ((horz_b * (x1 - x0)) + x0, y0)
+    c = ((horz * (x1 - x0)) + x0, y0)
+    d = (x1, y0 + (vert * (y1 - y0)))
+    e = (((x1 - x0) / 2) + x0, y1)
+
+    coordinates = [a, b, c, d, e]
+    to_draw = ImageDraw.Draw(image)
+    to_draw.polygon(coordinates, fill=cur_color)
+
 def gradient_of_x_colors_over_n(list_of_colors, n, hsv=False, lab=False):
     x = len(list_of_colors)
 
@@ -110,29 +128,18 @@ def line_gradient(list_of_colors, width, height, hsv=False, lab=False):
     return to_render
 
 
+def even_diamond_gradient(list_of_colors, width, height, hsv=False, lab=False):
+    def even_diamond(image, coordinates, cur_color):
+        even = .5
+        return diamond(image, coordinates, cur_color, even, even)
+    return master_gradient(list_of_colors, width, height, even_diamond, hsv, lab)
+
+
 def diamond_gradient(list_of_colors, width, height, hsv=False, lab=False):
-    def diamond(image, coordinates, cur_color):
-        x0 = coordinates[0]
-        y0 = coordinates[1]
-        x1 = coordinates[2]
-        y1 = coordinates[3]
+    def diamond_jewel(image, coordinates, cur_color):
+        return diamond(image, coordinates, cur_color, .25, .75)
 
-        vert = .2
-        horz_a = .8
-        horz_b = 1 - horz_a
-
-        a = (x0, y0 + (vert * (y1 - y0)))
-        b = ((horz_b * (x1 - x0)) + x0, y0)
-        c = ((horz_a * (x1 - x0)) + x0, y0)
-        d = (x1, y0 + (vert * (y1 - y0)))
-        e = (((x1 - x0) / 2) + x0, y1)
-
-        coordinates = [a, b, c, d, e]
-        print(coordinates)
-        to_draw = ImageDraw.Draw(image)
-        to_draw.polygon(coordinates, fill=cur_color)
-
-    return master_gradient(list_of_colors, width, height, diamond, hsv, lab)
+    return master_gradient(list_of_colors, width, height, diamond_jewel, hsv, lab)
 
 
 def square_gradient(list_of_colors, length, hsv=False, lab=False):
