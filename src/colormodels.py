@@ -106,11 +106,9 @@ class RGB:
 
         def lab_mid_transform(var):
             if var > .008856:
-                var **= (1/3)
+                return var ** (1/3)
             else:
-                var = (var * 7.787) + (16 / 116)
-
-            return var
+                return (var * 7.787) + (16 / 116)
 
         x = lab_mid_transform(x)
         y = lab_mid_transform(y)
@@ -119,6 +117,11 @@ class RGB:
         light = (116 * y) - 16
         a = 500 * (x - y)
         b = 200 * (y - z)
+
+        if light <= 0:
+            light = 0
+        elif 100 <= light:
+            light = 100
 
         return LAB(light, a, b)
 
@@ -303,17 +306,19 @@ class LAB:
         green = rgb_transform(green)
         blue = rgb_transform(blue)
 
-        if red < 0:
+        if red <= 0:
             red = 0
-        elif 255 < red:
+        elif 255 <= red:
             red = 255
-        elif green < 0:
+
+        if green <= 0:
             green = 0
-        elif 255 < green:
+        elif 255 <= green:
             green = 255
-        elif blue < 0:
+
+        if blue <= 0:
             blue = 0
-        elif 255 < blue:
+        elif 255 <= blue:
             blue = 255
 
         return RGB(red, green, blue)

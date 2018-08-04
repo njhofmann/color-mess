@@ -2,5 +2,4 @@ from src.gradientgenerators import *
 from src.colorschemagenerators import *
 from src.colormodels import *
 
-hsv = HSV(360, 5, 20)
-print(hsv.output())
+print(255 <= 255.00000319195593)
