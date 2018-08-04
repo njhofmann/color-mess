@@ -1,7 +1,13 @@
 from PIL import Image, ImageDraw
-import math
 import copy
-from src import RGB, HSV
+from src import *
+
+
+'''
+Every gradient can be created in either the RGB, HSV, or LAB color space - RGB is the default color space.
+To display in HSV, set the optional HSV parameter to 'True'. To display in LAB, set the optional HSV parameter
+to 'False' and the optional LAB parameter to 'True'
+'''
 
 
 def create_color_static(wid, hgt):
@@ -17,7 +23,17 @@ def create_color_static(wid, hgt):
     return to_render
 
 
-def gradient_of_x_colors_over_n(list_of_colors, n, hsv=False):
+def rectangle(image, coordinates, cur_color):
+    to_draw = ImageDraw.Draw(image)
+    to_draw.rectangle(coordinates, fill=cur_color)
+
+
+def ellipse(image, coordinates, cur_color):
+    to_draw = ImageDraw.Draw(image)
+    to_draw.ellipse(coordinates, fill=cur_color)
+
+
+def gradient_of_x_colors_over_n(list_of_colors, n, hsv=False, lab=False):
     x = len(list_of_colors)
 
     if n <= x - 1:
@@ -60,6 +76,14 @@ def gradient_of_x_colors_over_n(list_of_colors, n, hsv=False):
                 to_add_value = rounded_value_at_t(hsv_a.value, hsv_b.value, t)
                 to_add = HSV(to_add_hue, to_add_saturation, to_add_value)
                 to_add = to_add.to_rgb()
+            elif lab:
+                lab_a = a.to_lab()
+                lab_b = b.to_lab()
+                to_add_light = rounded_value_at_t(lab_a.light, lab_b.light, t)
+                to_add_a = rounded_value_at_t(lab_a.a, lab_b.a, t)
+                to_add_b = rounded_value_at_t(lab_a.b, lab_b.b, t)
+                to_add = LAB(to_add_light, to_add_a, to_add_b)
+                to_add = to_add.to_rgb()
             else:
                 to_add_red = rounded_value_at_t(a.red, b.red, t)
                 to_add_green = rounded_value_at_t(a.green, b.green, t)
@@ -74,8 +98,8 @@ def gradient_of_x_colors_over_n(list_of_colors, n, hsv=False):
     return gradient_values
 
 
-def line_gradient(list_of_colors, width, height, hsv=False):
-    results = gradient_of_x_colors_over_n(list_of_colors, width, hsv)
+def line_gradient(list_of_colors, width, height, hsv=False, lab=False):
+    results = gradient_of_x_colors_over_n(list_of_colors, width, hsv, lab)
 
     to_render = Image.new('RGB', (width, height))
     to_draw = ImageDraw.Draw(to_render)
@@ -86,23 +110,48 @@ def line_gradient(list_of_colors, width, height, hsv=False):
     return to_render
 
 
-def square_gradient(list_of_colors, length, hsv=False):
-    return master_gradient(list_of_colors, length, length, False, hsv)
+def diamond_gradient(list_of_colors, width, height, hsv=False, lab=False):
+    def diamond(image, coordinates, cur_color):
+        x0 = coordinates[0]
+        y0 = coordinates[1]
+        x1 = coordinates[2]
+        y1 = coordinates[3]
+
+        vert = .2
+        horz_a = .8
+        horz_b = 1 - horz_a
+
+        a = (x0, y0 + (vert * (y1 - y0)))
+        b = ((horz_b * (x1 - x0)) + x0, y0)
+        c = ((horz_a * (x1 - x0)) + x0, y0)
+        d = (x1, y0 + (vert * (y1 - y0)))
+        e = (((x1 - x0) / 2) + x0, y1)
+
+        coordinates = [a, b, c, d, e]
+        print(coordinates)
+        to_draw = ImageDraw.Draw(image)
+        to_draw.polygon(coordinates, fill=cur_color)
+
+    return master_gradient(list_of_colors, width, height, diamond, hsv, lab)
 
 
-def rectangle_gradient(list_of_colors, width, height, hsv=False):
-    return master_gradient(list_of_colors, width, height, False, hsv)
+def square_gradient(list_of_colors, length, hsv=False, lab=False):
+    return master_gradient(list_of_colors, length, length, rectangle, hsv, lab)
 
 
-def circle_gradient(list_of_colors, radius, hsv=False):
-    return master_gradient(list_of_colors, radius * 2, radius * 2, True, hsv)
+def rectangle_gradient(list_of_colors, width, height, hsv=False, lab=False):
+    return master_gradient(list_of_colors, width, height, rectangle, hsv, lab)
 
 
-def ellipse_gradient(list_of_colors, x_radius, y_radius, hsv=False):
-    return master_gradient(list_of_colors, x_radius * 2, y_radius * 2, True, hsv)
+def circle_gradient(list_of_colors, radius, hsv=False, lab=False):
+    return master_gradient(list_of_colors, radius * 2, radius * 2, ellipse, hsv, lab)
 
 
-def master_gradient(list_of_colors, width, height, ellipse=False, hsv=False):
+def ellipse_gradient(list_of_colors, x_radius, y_radius, hsv=False, lab=False):
+    return master_gradient(list_of_colors, x_radius * 2, y_radius * 2, ellipse, hsv, lab)
+
+
+def master_gradient(list_of_colors, width, height, shape, hsv=False, lab=False):
     if width <= height:
         shorter_radius = math.ceil(width / 2)
         longer_radius = math.ceil(height / 2)
@@ -112,8 +161,7 @@ def master_gradient(list_of_colors, width, height, ellipse=False, hsv=False):
         longer_radius = math.ceil(width / 2)
         to_render = Image.new('RGB', (width, height), (255, 255, 255))
 
-    to_draw = ImageDraw.Draw(to_render)
-    gradient_values = gradient_of_x_colors_over_n(list_of_colors, longer_radius, hsv)
+    gradient_values = gradient_of_x_colors_over_n(list_of_colors, longer_radius, hsv, lab)
     ratio = shorter_radius / longer_radius
 
     x0 = 0
@@ -125,15 +173,11 @@ def master_gradient(list_of_colors, width, height, ellipse=False, hsv=False):
         coordinates = [x0, y0, x1, y1]
         cur_color = gradient_values[longer_radius - i - 1]
 
-        if ellipse:
-            to_draw.ellipse(coordinates, fill=cur_color)
-        else:
-            to_draw.rectangle(coordinates, cur_color)
+        shape(to_render, coordinates, cur_color)
 
         x0 += 1
         y0 = round(x0 * ratio)
-        x1 -= 1
-        y1 = round(x1 * ratio)
+        x1 = to_render.width - x0
+        y1 = to_render.height - y0
 
     return to_render
-

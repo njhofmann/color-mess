@@ -1,5 +1,9 @@
-from src.gradientgenerators import *
-from src.colorschemagenerators import *
-from src.colormodels import *
+from src import *
+from PIL import ImageDraw, Image
 
-print(255 <= 255.00000319195593)
+a = RGB.random_rgb()
+b = RGB.random_rgb()
+c = RGB.random_rgb()
+colors = [a, b, c]
+img = diamond_gradient(colors, 1000, 1000)
+img.show()
