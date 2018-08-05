@@ -55,7 +55,7 @@ def diamond(image, coordinates, cur_color, vert, horz):
     to_draw.polygon(coordinates, fill=cur_color)
 
 
-def gradient_of_x_colors_over_n(list_of_colors, n, mode='rgb'):
+def gradient_of_x_colors_over_n(list_of_colors, n, mode='rgb', alpha=False):
     x = len(list_of_colors)
 
     if n <= x - 1:
@@ -98,7 +98,6 @@ def gradient_of_x_colors_over_n(list_of_colors, n, mode='rgb'):
                 to_add_value = rounded_value_at_t(hsv_a.value, hsv_b.value, t)
                 to_add = HSV(to_add_hue, to_add_saturation, to_add_value)
                 to_add = to_add.to_rgb()
-                gradient_values.append(to_add.output())
             elif mode == 'lab':
                 lab_a = a.to_lab()
                 lab_b = b.to_lab()
@@ -108,21 +107,19 @@ def gradient_of_x_colors_over_n(list_of_colors, n, mode='rgb'):
                 to_add_b = rounded_value_at_t(lab_a.b, lab_b.b, t)
                 to_add = LAB(to_add_light, to_add_a, to_add_b)
                 to_add = to_add.to_rgb()
-                gradient_values.append(to_add.output())
-            elif mode == 'rgb' or mode == 'rgba':
+            elif mode == 'rgb':
                 to_add_red = rounded_value_at_t(a.red, b.red, t)
                 to_add_green = rounded_value_at_t(a.green, b.green, t)
                 to_add_blue = rounded_value_at_t(a.blue, b.blue, t)
-
-                if mode == 'rgba':
-                    to_add_alpha = rounded_value_at_t(a.alpha, b.alpha, t)
-                    to_add = RGB(to_add_red, to_add_green, to_add_blue, to_add_alpha)
-                    gradient_values.append(to_add.output_as_rgba())
-                else:
-                    to_add = RGB(to_add_red, to_add_green, to_add_blue)
-                    gradient_values.append(to_add.output())
+                to_add = RGB(to_add_red, to_add_green, to_add_blue)
             else:
                 raise ValueError('Invalid color space!')
+
+            if alpha:
+                to_add.alpha = rounded_value_at_t(a.alpha, b.alpha, t)
+                gradient_values.append(to_add.output_as_rgba())
+            else:
+                gradient_values.append(to_add.output())
 
             if idx == len(pairs) - 1 and i == temp - 1:
                 if mode == 'rgba':
@@ -133,10 +130,13 @@ def gradient_of_x_colors_over_n(list_of_colors, n, mode='rgb'):
     return gradient_values
 
 
-def line_gradient(list_of_colors, width, height, mode='rgb'):
-    results = gradient_of_x_colors_over_n(list_of_colors, width, mode)
+def line_gradient(list_of_colors, width, height, mode='rgb', alpha=False):
+    results = gradient_of_x_colors_over_n(list_of_colors, width, mode, alpha)
 
-    to_render = Image.new('RGB', (width, height))
+    if alpha:
+        to_render = Image.new('RGBA', (width, height))
+    else:
+        to_render = Image.new('RGB', (width, height))
     to_draw = ImageDraw.Draw(to_render)
 
     for idx, color in enumerate(results):
@@ -145,30 +145,30 @@ def line_gradient(list_of_colors, width, height, mode='rgb'):
     return to_render
 
 
-def even_diamond_gradient(list_of_colors, width, height, fill_background=False, mode='rgb'):
+def even_diamond_gradient(list_of_colors, width, height, fill_background=False, mode='rgb', alpha=False):
     def even_diamond(image, coordinates, cur_color):
         even = .5
         return diamond(image, coordinates, cur_color, even, even)
 
-    return master_gradient(list_of_colors, width, height, even_diamond, fill_background, mode)
+    return master_gradient(list_of_colors, width, height, even_diamond, fill_background, mode, alpha)
 
 
-def diamond_gradient(list_of_colors, width, height, fill_background=False, mode='rgb'):
+def diamond_gradient(list_of_colors, width, height, fill_background=False, mode='rgb', alpha=False):
     def diamond_jewel(image, coordinates, cur_color):
         return diamond(image, coordinates, cur_color, .25, .75)
 
-    return master_gradient(list_of_colors, width, height, diamond_jewel, fill_background, mode)
+    return master_gradient(list_of_colors, width, height, diamond_jewel, fill_background, mode, alpha)
 
 
-def square_gradient(list_of_colors, length, fill_background=False, mode='rgb'):
-    return master_gradient(list_of_colors, length, length, rectangle, fill_background, mode)
+def square_gradient(list_of_colors, length, fill_background=False, mode='rgb', alpha=False):
+    return master_gradient(list_of_colors, length, length, rectangle, fill_background, mode, alpha)
 
 
-def rectangle_gradient(list_of_colors, width, height,fill_background=False,  mode='rgb'):
-    return master_gradient(list_of_colors, width, height, rectangle, fill_background, mode)
+def rectangle_gradient(list_of_colors, width, height,fill_background=False,  mode='rgb', alpha=False):
+    return master_gradient(list_of_colors, width, height, rectangle, fill_background, mode, alpha)
 
 
-def circle_gradient(list_of_colors, radius, fill_background=False, mode='rgb'):
+def circle_gradient(list_of_colors, radius, fill_background=False, mode='rgb', alpha=False):
     return master_gradient(list_of_colors, radius * 2, radius * 2, ellipse, fill_background, mode)
 
 
@@ -176,7 +176,7 @@ def ellipse_gradient(list_of_colors, x_radius, y_radius, fill_background=False, 
     return master_gradient(list_of_colors, x_radius * 2, y_radius * 2, ellipse, fill_background, mode)
 
 
-def master_gradient(list_of_colors, width, height, shape, fill_background=False, mode='rgb'):
+def master_gradient(list_of_colors, width, height, shape, fill_background=False, mode='rgb', alpha=False):
     if width <= height:
         shorter_radius = math.ceil(width / 2)
         longer_radius = math.ceil(height / 2)
@@ -185,10 +185,10 @@ def master_gradient(list_of_colors, width, height, shape, fill_background=False,
         longer_radius = math.ceil(width / 2)
 
     size = (width, height)
-    gradient_values = gradient_of_x_colors_over_n(list_of_colors, longer_radius, mode)
+    gradient_values = gradient_of_x_colors_over_n(list_of_colors, longer_radius, mode, alpha)
     ratio = shorter_radius / longer_radius
 
-    if mode == 'rgba':
+    if alpha:
         to_render = Image.new('RGBA', size, (255, 255, 255, 0))
     else:
         to_render = Image.new('RGB', size, (255, 255, 255))
