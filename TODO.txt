@@ -1,3 +1,4 @@
 -Documentation for existing classes and methods
--Parameter constraints
 -Color scheme generation
+-Create more backgrounds
+-Implement Lyold's algorithm for uniform image generation

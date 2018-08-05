@@ -1,58 +1,86 @@
 from PIL import Image, ImageDraw
 import copy
+import math
 from src import *
 
 
 '''
-Every gradient can be created in either the RGB, RGBA, HSV, or LAB color spaces.
+Every gradient can be created in either the RGB, HSV, or LAB color spaces.
 To display a gradient in the desired mode, set the optional 'mode' parameter to the following, RGB by default:
 -RGB - 'rgb' 
--RGBA - 'rgba'
 -HSV - 'hsv'
 -LAB - 'lab'
 '''
 
 
-def create_color_static(wid, hgt):
-    pixels = []
+class DrawOnImage:
 
-    for pixel in range(wid * hgt):
-        temp = RGB.random_rgb()
-        to_add = (temp.red, temp.green, temp.blue)
-        pixels.append(to_add)
+    @staticmethod
+    def rectangle(image, coordinates, cur_color):
+        to_draw = ImageDraw.Draw(image)
+        to_draw.rectangle(coordinates, fill=cur_color)
 
-    to_render = Image.new('RGB', (wid, hgt))
-    to_render.putdata(pixels)
-    return to_render
+    @staticmethod
+    def ellipse(image, coordinates, cur_color):
+        to_draw = ImageDraw.Draw(image)
+        to_draw.ellipse(coordinates, fill=cur_color)
 
+    @staticmethod
+    def diamond(image, coordinates, cur_color, vert, horz):
+        upper_left_x = coordinates[0]
+        upper_left_y = coordinates[1]
+        lower_right_x = coordinates[2]
+        lower_right_y = coordinates[3]
 
-def rectangle(image, coordinates, cur_color):
-    to_draw = ImageDraw.Draw(image)
-    to_draw.rectangle(coordinates, fill=cur_color)
+        actual_vert = lower_right_y - upper_left_y
+        actual_horz = lower_right_x - upper_left_x
+        horz_b = 1 - horz
 
+        a = (upper_left_x, upper_left_y + (vert * (actual_vert)))
+        b = ((horz_b * (actual_horz)) + upper_left_x, upper_left_y)
+        c = ((horz * (actual_horz)) + upper_left_x, upper_left_y)
+        d = (lower_right_x, upper_left_y + (vert * (actual_vert)))
+        e = (((actual_horz) / 2) + upper_left_x, lower_right_y)
 
-def ellipse(image, coordinates, cur_color):
-    to_draw = ImageDraw.Draw(image)
-    to_draw.ellipse(coordinates, fill=cur_color)
+        coordinates = [a, b, c, d, e]
+        to_draw = ImageDraw.Draw(image)
+        to_draw.polygon(coordinates, fill=cur_color)
 
+    @staticmethod
+    def even_diamond(image, coordinates, cur_color):
+        even = .5
+        return DrawOnImage.diamond(image, coordinates, cur_color, even, even)
 
-def diamond(image, coordinates, cur_color, vert, horz):
-    x0 = coordinates[0]
-    y0 = coordinates[1]
-    x1 = coordinates[2]
-    y1 = coordinates[3]
+    @staticmethod
+    def double_diamond(image, coordinates, cur_color):
+        upper_left_x = coordinates[0]
+        upper_left_y = coordinates[1]
+        lower_right_x = coordinates[2]
+        lower_right_y = coordinates[3]
 
-    horz_b = 1 - horz
+        actual_vert = lower_right_y - upper_left_y
+        actual_horz = lower_right_x - upper_left_x
 
-    a = (x0, y0 + (vert * (y1 - y0)))
-    b = ((horz_b * (x1 - x0)) + x0, y0)
-    c = ((horz * (x1 - x0)) + x0, y0)
-    d = (x1, y0 + (vert * (y1 - y0)))
-    e = (((x1 - x0) / 2) + x0, y1)
+        vert_a = .2
+        vert_b = 1 - vert_a
+        horz_a = .2
+        horz_b = 1 - horz_a
+        mid_offset = actual_horz * .35
 
-    coordinates = [a, b, c, d, e]
-    to_draw = ImageDraw.Draw(image)
-    to_draw.polygon(coordinates, fill=cur_color)
+        a = (upper_left_x, upper_left_y + (vert_a * (actual_vert)))
+        b = ((horz_a * (actual_horz)) + upper_left_x, upper_left_y)
+        c = ((horz_b * (actual_horz)) + upper_left_x, upper_left_y)
+        d = (lower_right_x, upper_left_y + (vert_a * (actual_vert)))
+        e = (((actual_horz) / 2) + upper_left_x + mid_offset, (actual_vert / 2) + upper_left_y)
+        f = (lower_right_x, upper_left_y + (vert_b * (actual_vert)))
+        g = ((horz_b * (actual_horz)) + upper_left_x, lower_right_y)
+        h = ((horz_a * (actual_horz)) + upper_left_x, lower_right_y)
+        i = (upper_left_x, upper_left_y + (vert_b * (actual_vert)))
+        j = (((actual_horz) / 2) + upper_left_x - mid_offset, (actual_vert / 2) + upper_left_y)
+
+        coordinates = [a, b, c, d, e, f, g, h, i, j]
+        to_draw = ImageDraw.Draw(image)
+        to_draw.polygon(coordinates, fill=cur_color)
 
 
 def gradient_of_x_colors_over_n(list_of_colors, n, mode='rgb', alpha=False):
@@ -122,7 +150,7 @@ def gradient_of_x_colors_over_n(list_of_colors, n, mode='rgb', alpha=False):
                 gradient_values.append(to_add.output())
 
             if idx == len(pairs) - 1 and i == temp - 1:
-                if mode == 'rgba':
+                if alpha:
                     gradient_values.append(b.output_as_rgba())
                 else:
                     gradient_values.append(b.output())
@@ -146,34 +174,25 @@ def line_gradient(list_of_colors, width, height, mode='rgb', alpha=False):
 
 
 def even_diamond_gradient(list_of_colors, width, height, fill_background=False, mode='rgb', alpha=False):
-    def even_diamond(image, coordinates, cur_color):
-        even = .5
-        return diamond(image, coordinates, cur_color, even, even)
-
-    return master_gradient(list_of_colors, width, height, even_diamond, fill_background, mode, alpha)
+    return master_gradient(list_of_colors, width, height, DrawOnImage.even_diamond, fill_background, mode, alpha)
 
 
 def diamond_gradient(list_of_colors, width, height, fill_background=False, mode='rgb', alpha=False):
     def diamond_jewel(image, coordinates, cur_color):
-        return diamond(image, coordinates, cur_color, .25, .75)
+        return DrawOnImage.diamond(image, coordinates, cur_color, .25, .75)
 
     return master_gradient(list_of_colors, width, height, diamond_jewel, fill_background, mode, alpha)
 
 
-def square_gradient(list_of_colors, length, fill_background=False, mode='rgb', alpha=False):
-    return master_gradient(list_of_colors, length, length, rectangle, fill_background, mode, alpha)
-
-
 def rectangle_gradient(list_of_colors, width, height,fill_background=False,  mode='rgb', alpha=False):
-    return master_gradient(list_of_colors, width, height, rectangle, fill_background, mode, alpha)
+    return master_gradient(list_of_colors, width, height, DrawOnImage.rectangle, fill_background, mode, alpha)
 
 
-def circle_gradient(list_of_colors, radius, fill_background=False, mode='rgb', alpha=False):
-    return master_gradient(list_of_colors, radius * 2, radius * 2, ellipse, fill_background, mode)
+def ellipse_gradient(list_of_colors, x_length, y_length, fill_background=False, mode='rgb', alpha=False):
+    return master_gradient(list_of_colors, x_length, y_length, DrawOnImage.ellipse, fill_background, mode, alpha)
 
-
-def ellipse_gradient(list_of_colors, x_radius, y_radius, fill_background=False, mode='rgb'):
-    return master_gradient(list_of_colors, x_radius * 2, y_radius * 2, ellipse, fill_background, mode)
+def double_diamond_gradient(list_of_colors, width, height, fill_background=False, mode='rgb', alpha=False):
+    return master_gradient(list_of_colors, width, height, DrawOnImage.double_diamond, fill_background, mode, alpha)
 
 
 def master_gradient(list_of_colors, width, height, shape, fill_background=False, mode='rgb', alpha=False):
@@ -189,31 +208,31 @@ def master_gradient(list_of_colors, width, height, shape, fill_background=False,
     ratio = shorter_radius / longer_radius
 
     if alpha:
-        to_render = Image.new('RGBA', size, (255, 255, 255, 0))
+        to_render = Image.new('RGBA', size)
     else:
-        to_render = Image.new('RGB', size, (255, 255, 255))
+        to_render = Image.new('RGB', size)
 
     if fill_background:
         to_render.paste(gradient_values[-1], [0, 0, to_render.size[0], to_render.size[1]])
 
-    x0 = 0
-    y0 = 0
-    x1 = to_render.width
-    y1 = to_render.height
+    upper_left_x = 0
+    upper_left_y = 0
+    lower_right_x = to_render.width
+    lower_right_y = to_render.height
 
     for i in range(longer_radius):
-        coordinates = [x0, y0, x1, y1]
+        coordinates = [upper_left_x, upper_left_y, lower_right_x, lower_right_y]
         cur_color = gradient_values[longer_radius - i - 1]
         shape(to_render, coordinates, cur_color)
 
         if width <= height:
-            y0 += 1
-            x0 = round(y0 * ratio)
+            upper_left_y += 1
+            upper_left_x = round(upper_left_y * ratio)
         else:
-            x0 += 1
-            y0 = round(x0 * ratio)
+            upper_left_x += 1
+            upper_left_y = round(upper_left_x * ratio)
 
-        x1 = to_render.width - x0
-        y1 = to_render.height - y0
+        lower_right_x = to_render.width - upper_left_x
+        lower_right_y = to_render.height - upper_left_y
 
     return to_render

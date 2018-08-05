@@ -1,6 +1,4 @@
-import colorsys
 import random
-import math
 
 '''
 The conversion between an RGB value to a LAB value is not one to one, each conversion requires an intermediary 
