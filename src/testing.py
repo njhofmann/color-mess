@@ -1,12 +1,12 @@
 from src import *
 from PIL import ImageDraw, Image
 
-colors = RGB.x_random_rbgs(7)
-img = diamond_gradient(colors, 2000, 2500, True)
-back = img.rotate(90)
-result = Image.blend(img, back, .5)
-rotate = result.rotate(180)
-result = Image.blend(result, rotate, .5)
-rotate = result.rotate(45)
-result = Image.blend(result, rotate, .5)
-result.show()
+a = RGB.n_random_rgba(6)
+for i in a:
+    print(i.output_as_rgba())
+a = diamond_gradient(a, 1500, 2000, False, 'rgba')
+rot = a.rotate(180)
+result = Image.alpha_composite(a, rot)
+rot = result.rotate(90)
+result = Image.alpha_composite(rot, result)
+result.crop([250, 250, 1250, 1750]).show()

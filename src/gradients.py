@@ -4,9 +4,12 @@ from src import *
 
 
 '''
-Every gradient can be created in either the RGB, HSV, or LAB color space - RGB is the default color space.
-To display in HSV, set the optional HSV parameter to 'True'. To display in LAB, set the optional HSV parameter
-to 'False' and the optional LAB parameter to 'True'
+Every gradient can be created in either the RGB, RGBA, HSV, or LAB color spaces.
+To display a gradient in the desired mode, set the optional 'mode' parameter to the following, RGB by default:
+-RGB - 'rgb' 
+-RGBA - 'rgba'
+-HSV - 'hsv'
+-LAB - 'lab'
 '''
 
 
@@ -14,7 +17,7 @@ def create_color_static(wid, hgt):
     pixels = []
 
     for pixel in range(wid * hgt):
-        temp = RGB.create_random_rgb()
+        temp = RGB.random_rgb()
         to_add = (temp.red, temp.green, temp.blue)
         pixels.append(to_add)
 
@@ -52,7 +55,7 @@ def diamond(image, coordinates, cur_color, vert, horz):
     to_draw.polygon(coordinates, fill=cur_color)
 
 
-def gradient_of_x_colors_over_n(list_of_colors, n, hsv=False, lab=False):
+def gradient_of_x_colors_over_n(list_of_colors, n, mode='rgb'):
     x = len(list_of_colors)
 
     if n <= x - 1:
@@ -86,7 +89,7 @@ def gradient_of_x_colors_over_n(list_of_colors, n, hsv=False, lab=False):
         for i in range(temp):
             t = i / temp
 
-            if hsv:
+            if mode == 'hsv':
                 hsv_a = a.to_hsv()
                 hsv_b = b.to_hsv()
 
@@ -95,30 +98,43 @@ def gradient_of_x_colors_over_n(list_of_colors, n, hsv=False, lab=False):
                 to_add_value = rounded_value_at_t(hsv_a.value, hsv_b.value, t)
                 to_add = HSV(to_add_hue, to_add_saturation, to_add_value)
                 to_add = to_add.to_rgb()
-            elif lab:
+                gradient_values.append(to_add.output())
+            elif mode == 'lab':
                 lab_a = a.to_lab()
                 lab_b = b.to_lab()
+                
                 to_add_light = rounded_value_at_t(lab_a.light, lab_b.light, t)
                 to_add_a = rounded_value_at_t(lab_a.a, lab_b.a, t)
                 to_add_b = rounded_value_at_t(lab_a.b, lab_b.b, t)
                 to_add = LAB(to_add_light, to_add_a, to_add_b)
                 to_add = to_add.to_rgb()
-            else:
+                gradient_values.append(to_add.output())
+            elif mode == 'rgb' or mode == 'rgba':
                 to_add_red = rounded_value_at_t(a.red, b.red, t)
                 to_add_green = rounded_value_at_t(a.green, b.green, t)
                 to_add_blue = rounded_value_at_t(a.blue, b.blue, t)
-                to_add = RGB(to_add_red, to_add_green, to_add_blue)
 
-            gradient_values.append(to_add.output())
+                if mode == 'rgba':
+                    to_add_alpha = rounded_value_at_t(a.alpha, b.alpha, t)
+                    to_add = RGB(to_add_red, to_add_green, to_add_blue, to_add_alpha)
+                    gradient_values.append(to_add.output_as_rgba())
+                else:
+                    to_add = RGB(to_add_red, to_add_green, to_add_blue)
+                    gradient_values.append(to_add.output())
+            else:
+                raise ValueError('Invalid color space!')
 
             if idx == len(pairs) - 1 and i == temp - 1:
-                gradient_values.append(b.output())
+                if mode == 'rgba':
+                    gradient_values.append(b.output_as_rgba())
+                else:
+                    gradient_values.append(b.output())
 
     return gradient_values
 
 
-def line_gradient(list_of_colors, width, height, hsv=False, lab=False):
-    results = gradient_of_x_colors_over_n(list_of_colors, width, hsv, lab)
+def line_gradient(list_of_colors, width, height, mode='rgb'):
+    results = gradient_of_x_colors_over_n(list_of_colors, width, mode)
 
     to_render = Image.new('RGB', (width, height))
     to_draw = ImageDraw.Draw(to_render)
@@ -129,49 +145,53 @@ def line_gradient(list_of_colors, width, height, hsv=False, lab=False):
     return to_render
 
 
-def even_diamond_gradient(list_of_colors, width, height, fill_background=False, hsv=False, lab=False):
+def even_diamond_gradient(list_of_colors, width, height, fill_background=False, mode='rgb'):
     def even_diamond(image, coordinates, cur_color):
         even = .5
         return diamond(image, coordinates, cur_color, even, even)
 
-    return master_gradient(list_of_colors, width, height, even_diamond, fill_background, hsv, lab)
+    return master_gradient(list_of_colors, width, height, even_diamond, fill_background, mode)
 
 
-def diamond_gradient(list_of_colors, width, height, fill_background=False, hsv=False, lab=False):
+def diamond_gradient(list_of_colors, width, height, fill_background=False, mode='rgb'):
     def diamond_jewel(image, coordinates, cur_color):
         return diamond(image, coordinates, cur_color, .25, .75)
 
-    return master_gradient(list_of_colors, width, height, diamond_jewel, fill_background, hsv, lab)
+    return master_gradient(list_of_colors, width, height, diamond_jewel, fill_background, mode)
 
 
-def square_gradient(list_of_colors, length, fill_background=False, hsv=False, lab=False):
-    return master_gradient(list_of_colors, length, length, rectangle, fill_background, hsv, lab)
+def square_gradient(list_of_colors, length, fill_background=False, mode='rgb'):
+    return master_gradient(list_of_colors, length, length, rectangle, fill_background, mode)
 
 
-def rectangle_gradient(list_of_colors, width, height,fill_background=False,  hsv=False, lab=False):
-    return master_gradient(list_of_colors, width, height, rectangle, fill_background, hsv, lab)
+def rectangle_gradient(list_of_colors, width, height,fill_background=False,  mode='rgb'):
+    return master_gradient(list_of_colors, width, height, rectangle, fill_background, mode)
 
 
-def circle_gradient(list_of_colors, radius, fill_background=False, hsv=False, lab=False):
-    return master_gradient(list_of_colors, radius * 2, radius * 2, ellipse, fill_background, hsv, lab)
+def circle_gradient(list_of_colors, radius, fill_background=False, mode='rgb'):
+    return master_gradient(list_of_colors, radius * 2, radius * 2, ellipse, fill_background, mode)
 
 
-def ellipse_gradient(list_of_colors, x_radius, y_radius, fill_background=False, hsv=False, lab=False):
-    return master_gradient(list_of_colors, x_radius * 2, y_radius * 2, ellipse, fill_background, hsv, lab)
+def ellipse_gradient(list_of_colors, x_radius, y_radius, fill_background=False, mode='rgb'):
+    return master_gradient(list_of_colors, x_radius * 2, y_radius * 2, ellipse, fill_background, mode)
 
 
-def master_gradient(list_of_colors, width, height, shape, fill_background=False, hsv=False, lab=False):
+def master_gradient(list_of_colors, width, height, shape, fill_background=False, mode='rgb'):
     if width <= height:
         shorter_radius = math.ceil(width / 2)
         longer_radius = math.ceil(height / 2)
-        to_render = Image.new('RGB', (height, width), (255, 255, 255))
-    elif width > height:
+    else:
         shorter_radius = math.ceil(height / 2)
         longer_radius = math.ceil(width / 2)
-        to_render = Image.new('RGB', (width, height), (255, 255, 255))
 
-    gradient_values = gradient_of_x_colors_over_n(list_of_colors, longer_radius, hsv, lab)
+    size = (width, height)
+    gradient_values = gradient_of_x_colors_over_n(list_of_colors, longer_radius, mode)
     ratio = shorter_radius / longer_radius
+
+    if mode == 'rgba':
+        to_render = Image.new('RGBA', size, (255, 255, 255, 0))
+    else:
+        to_render = Image.new('RGB', size, (255, 255, 255))
 
     if fill_background:
         to_render.paste(gradient_values[-1], [0, 0, to_render.size[0], to_render.size[1]])
@@ -184,11 +204,15 @@ def master_gradient(list_of_colors, width, height, shape, fill_background=False,
     for i in range(longer_radius):
         coordinates = [x0, y0, x1, y1]
         cur_color = gradient_values[longer_radius - i - 1]
-
         shape(to_render, coordinates, cur_color)
 
-        x0 += 1
-        y0 = round(x0 * ratio)
+        if width <= height:
+            y0 += 1
+            x0 = round(y0 * ratio)
+        else:
+            x0 += 1
+            y0 = round(x0 * ratio)
+
         x1 = to_render.width - x0
         y1 = to_render.height - y0
 
