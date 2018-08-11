@@ -252,6 +252,21 @@ class HSV:
         green = ((g + m) * rgb_max_value)
         blue = ((b + m) * rgb_max_value)
 
+        if red > 255:
+            red = 255
+        elif red < 0:
+            red = 0
+
+        if green > 255:
+            green = 255
+        elif green < 0:
+            green = 0
+
+        if blue > 255:
+            blue = 255
+        elif blue < 0:
+            blue = 0
+
         return RGB(red, green, blue, self.alpha)
 
     def to_lab(self):
