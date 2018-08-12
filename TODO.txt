@@ -1,4 +1,7 @@
 -Documentation for existing classes and methods
 -Color scheme generation
 -Create more backgrounds
+-Valid height and width method
+-Proper overlay for regular shapes with rotations
+-Star and arced circle
 -Implement Lyold's algorithm for uniform image generation
