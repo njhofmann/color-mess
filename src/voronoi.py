@@ -11,6 +11,11 @@ def euclidean_distance(x0, y0, x1, y1):
 def manhattan_distance(x0, y0, x1, y1):
     return abs(y1 - y0) + abs(x1 - x0)
 
+def ramanujans_ellipse_arc(x0, y0, x1, y1):
+    a = abs(x1 - x0)
+    b = abs(y1 - y0)
+    pi = 3.14159265358979
+    return ((pi / 4) * ((3 * (a + b)) - math.sqrt(((3 * a) + b) * (a + (3 * b)))))
 
 def random_feature_points(width, height, num_of_points):
     if num_of_points < 1:
@@ -53,13 +58,13 @@ def voronoi(width, height, feature_points, distance):
     return list(feature_points_and_coors.values())
 
 
-def lloyds_algorithm(width, height, num_of_points):
+def lloyds_algorithm(width, height, num_of_points, distance):
     old_feature_points = random_feature_points(width, height, num_of_points)
     new_feature_points = old_feature_points
-    
+
     avg_dist_moved = 2
     while avg_dist_moved > .001:
-        result_groups = voronoi(width, height, new_feature_points, euclidean_distance)
+        result_groups = voronoi(width, height, new_feature_points, distance)
         
         old_feature_points = new_feature_points
         new_feature_points = []
@@ -80,9 +85,9 @@ def lloyds_algorithm(width, height, num_of_points):
             old_feature_points_coor = old_feature_points[idx]
             avg_dist_moved += euclidean_distance(xy[0], xy[1], old_feature_points_coor[0], old_feature_points_coor[1])
             new_feature_points.append(xy)
+            print(avg_dist_moved)
 
         avg_dist_moved /= len(new_feature_points)
-        print(avg_dist_moved)
 
     return result_groups
 
@@ -103,7 +108,7 @@ def render_voronoi(groupings):
     to_render = Image.new('RGB', (max_width, max_height))
     to_draw = ImageDraw.Draw(to_render)
 
-    for group in groupings:
+    for idx, group in enumerate(groupings):
         cur_color = RGB.random_rgb().output()
         for coor in group:
             to_draw.point(coor, fill=cur_color)
@@ -111,5 +116,6 @@ def render_voronoi(groupings):
     return to_render
 
 
-results = lloyds_algorithm(500, 500, 5)
+x = 200
+results = lloyds_algorithm(x, x, 20, ramanujans_ellipse_arc)
 render_voronoi(results).show()
