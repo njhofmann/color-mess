@@ -1,10 +1,42 @@
 from src.colormodels import RGB, HSV
 from src.gradients import Gradients
 from PIL import Image, ImageDraw
+import collections
 import random
+
 
 shapes = (Gradients.diamond_gradient, Gradients.double_diamond_gradient, Gradients.star_gradient,
           Gradients.even_diamond_gradient, Gradients.ellipse_gradient, Gradients.rectangle_gradient)
+
+def gradient_shifts(width, height, sections):
+    if sections > width:
+        raise ValueError("Can't have more sections than the given width!")
+    elif width % sections != 0:
+        raise ValueError('Given number of sections must be equally divisible by the given width!')
+
+    rgbs = RGB.n_random_rbgs(3)
+    gradient = collections.deque(Gradients.create_color_gradient(rgbs, height, 'rgb', False, True))
+    shifts = [random.choice((True, False)) for i in range(sections)] # Shift up by 1 if True, down by 1 if False
+
+    to_render = Image.new('RGB', (width, height))
+    to_draw = ImageDraw.Draw(to_render)
+
+    section_size = round(width / sections)
+    cur_column = 0
+    n = round(width * .025)
+    for shift in shifts:
+        if shift:
+            gradient.rotate(-n)
+        else:
+            gradient.rotate(n)
+
+        for column in range(section_size):
+            for row in range(height):
+                to_draw.point((cur_column, row), gradient[row])
+            cur_column += 1
+
+    return to_render
+
 
 
 def straight_granite(width, height):
@@ -55,9 +87,6 @@ def straight_granite(width, height):
 
     to_render = to_render.crop((0, 1, width, temp_height))
     return to_render
-
-
-
 
 
 def granite(width, height):

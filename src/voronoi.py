@@ -14,7 +14,7 @@ def manhattan_distance(x0, y0, x1, y1):
 def ramanujans_ellipse_arc(x0, y0, x1, y1):
     a = abs(x1 - x0)
     b = abs(y1 - y0)
-    pi = 3.14159265358979
+    pi = 3.14159
     return ((pi / 4) * ((3 * (a + b)) - math.sqrt(((3 * a) + b) * (a + (3 * b)))))
 
 def random_feature_points(width, height, num_of_points):
@@ -63,7 +63,7 @@ def lloyds_algorithm(width, height, num_of_points, distance):
     new_feature_points = old_feature_points
 
     avg_dist_moved = 2
-    while avg_dist_moved > .001:
+    while avg_dist_moved > .5:
         result_groups = voronoi(width, height, new_feature_points, distance)
         
         old_feature_points = new_feature_points

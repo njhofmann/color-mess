@@ -111,11 +111,15 @@ class DrawOnImage:
 
 class Gradients:
     @staticmethod
-    def create_color_gradient(list_of_colors, n, mode='rgb', alpha=False):
+    def create_color_gradient(list_of_colors, n, mode='rgb', alpha=False, reflect=False):
         x = len(list_of_colors)
 
         if n <= x - 1:
             raise ValueError('')
+
+        original_n = n
+        if reflect:
+            math.ceil(n / 2)
 
         if x == 1:
             return [copy.copy(list_of_colors[0]) for i in range(n)]
@@ -182,6 +186,12 @@ class Gradients:
                         gradient_values.append(b.output_as_rgba())
                     else:
                         gradient_values.append(b.output())
+
+        if reflect:
+            gradient_values += gradient_values[::-1]
+
+            if len(gradient_values) > original_n:
+                gradient_values = gradient_values[:len(gradient_values)-1]
 
         return gradient_values
     
