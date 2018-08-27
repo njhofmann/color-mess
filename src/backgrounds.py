@@ -1,5 +1,5 @@
-from src.colormodels import RGB, HSV
-from src.gradients import Gradients
+from colormodels import RGB, HSV
+from gradients import Gradients
 from PIL import Image, ImageDraw
 import collections
 import random
@@ -7,6 +7,7 @@ import random
 
 shapes = (Gradients.diamond_gradient, Gradients.double_diamond_gradient, Gradients.star_gradient,
           Gradients.even_diamond_gradient, Gradients.ellipse_gradient, Gradients.rectangle_gradient)
+
 
 def gradient_shifts(width, height, sections):
     if sections > width:

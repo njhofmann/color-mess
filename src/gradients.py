@@ -1,7 +1,7 @@
 from PIL import Image, ImageDraw
 import copy
 import math
-from src.colormodels import RGB, HSV, LAB
+from colormodels import RGB, HSV, LAB
 
 
 '''
