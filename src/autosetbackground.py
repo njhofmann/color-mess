@@ -1,6 +1,6 @@
 from backgrounds import gradient_shifts, granite, regular_shape, straight_granite, plaid, rotated_diamond
 from gradients import star_gradient, rectangle_gradient, even_diamond_gradient, diamond_gradient, \
-    double_diamond_gradient, ellipse_gradient, line_gradient
+    double_diamond_gradient, ellipse_gradient, line_gradient, lopsided_arced_rect_gradient, even_arced_rect_gradient
 import sys
 import random
 import os
@@ -13,7 +13,8 @@ def create_and_set_backgound():
     height = 1080
     shape = random.choice((granite, gradient_shifts, regular_shape, straight_granite, plaid, rotated_diamond,
                             star_gradient, rectangle_gradient, even_diamond_gradient, double_diamond_gradient,
-                            ellipse_gradient, diamond_gradient, line_gradient))
+                            ellipse_gradient, diamond_gradient, line_gradient, even_arced_rect_gradient,
+                           lopsided_arced_rect_gradient))
 
     img = shape(width, height)
 

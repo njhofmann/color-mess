@@ -55,6 +55,97 @@ def ellipse(image, coordinates, cur_color):
     to_draw.ellipse(coordinates, fill=cur_color)
 
 
+def arced_rectangle(image, coordinates, cur_color, x_perc, y_perc):
+    def midpoint_curve_x(start_x, start_y, mid_x, mid_y, end_x, end_y):
+        if not (start_x < mid_x < end_x):
+            raise ValueError('Given x positions can\' interfere with each others sections!')
+
+        coors = []
+        pi = math.pi
+
+        width_1 = round(abs(mid_x - start_x))
+        for point in range(width_1):
+            y = (mid_y - start_y) * math.sin((point * pi) / (width_1 * 2))
+            coor = (point + start_x, y + start_y)
+            coors.append(coor)
+
+        width_2 = round(abs(end_x - mid_x))
+        for point in range(width_2):
+            y = (mid_y - end_y) * math.sin(((point + width_2) * pi) / (width_2 * 2))
+            coor = (point + width_1 + start_x, y + end_y)
+            coors.append(coor)
+
+        return coors
+
+    def midpoint_curve_y(start_x, start_y, mid_x, mid_y, end_x, end_y):
+        if not (start_y < mid_y < end_y):
+            raise ValueError('Given x positions can\' interfere with each others sections!')
+
+        pi = math.pi
+        coors = []
+
+        width_1 = round(abs(mid_y - start_y))
+        for point in range(width_1):
+            x = (mid_x - start_x) * math.sin((point * pi) / (width_1 * 2))
+            coor = (x + start_x, point + start_y)
+            coors.append(coor)
+
+        width_2 = round(abs(end_y - mid_y))
+        for point in range(width_2):
+            x = (mid_x - end_x) * math.sin(((point + width_2) * pi) / (width_2 * 2))
+            coor = (x + end_x, point + width_1 + start_y)
+            coors.append(coor)
+
+        return coors
+
+    upper_left_x = coordinates[0]
+    upper_left_y = coordinates[1]
+    lower_right_x = coordinates[2]
+    lower_right_y = coordinates[3]
+
+    actual_vert = lower_right_y - upper_left_y
+    actual_horz = lower_right_x - upper_left_x
+
+    horz_x_dist = x_perc * actual_horz
+    horz_y_dist = y_perc * actual_vert
+
+    vert_y_dist = x_perc * actual_vert
+    vert_x_dist = y_perc * actual_horz
+
+    top_x = lower_right_x - horz_x_dist
+    top_y = upper_left_y + horz_y_dist
+
+    right_x = lower_right_x - vert_x_dist
+    right_y = lower_right_y - vert_y_dist
+
+    bottom_x = upper_left_x + horz_x_dist
+    bottom_y = lower_right_y - horz_y_dist
+
+    left_x = upper_left_x + vert_x_dist
+    left_y = upper_left_y + vert_y_dist
+
+    top = midpoint_curve_x(upper_left_x, upper_left_y, top_x, top_y, lower_right_x, upper_left_y)
+    right = midpoint_curve_y(lower_right_x, upper_left_y, right_x, right_y, lower_right_x, lower_right_y)
+    bottom = midpoint_curve_x(upper_left_x, lower_right_y, bottom_x, bottom_y, lower_right_x, lower_right_y)
+    left = midpoint_curve_y(upper_left_x, upper_left_y, left_x, left_y, upper_left_x, lower_right_y)
+
+    right.reverse()
+    top.reverse()
+    coors = left + bottom + right + top
+
+    to_draw = ImageDraw.Draw(image)
+    to_draw.polygon(xy=coors, fill=cur_color)
+
+
+
+def even_arced_rect(image, coordinates, cur_color):
+    arced_rectangle(image, coordinates, cur_color, .5, .15)
+
+
+def lopsided_arced_rect(image, coordinates, cur_color):
+    arced_rectangle(image, coordinates, cur_color, .3, .2)
+
+
 def diamond(image, coordinates, cur_color, vert, horz):
     upper_left_x = coordinates[0]
     upper_left_y = coordinates[1]
@@ -253,6 +344,14 @@ def line_gradient(width, height, list_of_colors=random_colors(), mode='rgb', alp
         to_draw.line([idx, 0, idx, height - 1], color, 0)
 
     return to_render
+
+
+def lopsided_arced_rect_gradient(width, height, list_of_colors=random_colors(), fill_background=True, mode='rgb', alpha=False):
+    return master_gradient(width, height, list_of_colors, lopsided_arced_rect, fill_background, mode, alpha)
+
+
+def even_arced_rect_gradient(width, height, list_of_colors=random_colors(), fill_background=True, mode='rgb', alpha=False):
+    return master_gradient(width, height, list_of_colors, even_arced_rect, fill_background, mode, alpha)
 
 
 def star_gradient(width, height, list_of_colors=random_colors(), fill_background=True, mode='rgb', alpha=False):
