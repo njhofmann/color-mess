@@ -1,22 +1,22 @@
 from colormodels import RGB, HSV
-from gradients import Gradients
+import gradients
 from PIL import Image, ImageDraw
 import collections
 import random
 
 
-shapes = (Gradients.diamond_gradient, Gradients.double_diamond_gradient, Gradients.star_gradient,
-          Gradients.even_diamond_gradient, Gradients.ellipse_gradient, Gradients.rectangle_gradient)
+shapes = (gradients.diamond_gradient, gradients.double_diamond_gradient, gradients.star_gradient,
+          gradients.even_diamond_gradient, gradients.ellipse_gradient, gradients.rectangle_gradient)
 
 
-def gradient_shifts(width, height, sections):
+def gradient_shifts(width, height, sections=random.choice((4, 6, 8, 16, 20, 40, 60))):
     if sections > width:
         raise ValueError("Can't have more sections than the given width!")
     elif width % sections != 0:
         raise ValueError('Given number of sections must be equally divisible by the given width!')
 
     rgbs = RGB.n_random_rbgs(3)
-    gradient = collections.deque(Gradients.create_color_gradient(rgbs, height, 'rgb', False, True))
+    gradient = collections.deque(gradients.create_color_gradient(rgbs, height, 'rgb', False, True))
     shifts = [random.choice((True, False)) for i in range(sections)] # Shift up by 1 if True, down by 1 if False
 
     to_render = Image.new('RGB', (width, height))
@@ -37,7 +37,6 @@ def gradient_shifts(width, height, sections):
             cur_column += 1
 
     return to_render
-
 
 
 def straight_granite(width, height):
@@ -144,16 +143,14 @@ def regular_shape(width, height):
     n = random.randint(2, 6)
     colors = RGB.n_random_rgba(n)
     shape_to_render = random.choice(shapes)
-    gradient = shape_to_render(colors, width, height, True, 'rgb', True)
+    gradient = shape_to_render(width=width, height=height, list_of_colors=colors, mode='rgb', alpha=True)
     return gradient
 
 
 def plaid(width, height):
-    n = random.randint(2, 6)
-    colors = RGB.n_random_rgba(n)
     longer_length = max(width, height)
 
-    grad = Gradients.line_gradient(colors, longer_length, longer_length, 'rgb', True)
+    grad = gradients.line_gradient(width=longer_length, height=longer_length, mode='rgb', alpha=True)
     rotated_grad = grad.rotate(90)
     result = Image.blend(grad, rotated_grad, .5)
 
@@ -167,7 +164,7 @@ def plaid(width, height):
 def rotated_diamond(width, height):
     n = random.randint(2, 8)
     colors = RGB.n_random_rgba(n)
-    gradient = Gradients.diamond_gradient(colors, width, height, True, 'rgb', True)
+    gradient = gradients.diamond_gradient(list_of_colors=colors, width=width, height=height, mode='rgb', alpha=True)
     rotated_gradient = gradient.rotate(180)
     vert = Image.alpha_composite(gradient, rotated_gradient)
     horz = vert.rotate(90)

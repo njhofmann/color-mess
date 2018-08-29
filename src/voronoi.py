@@ -115,7 +115,7 @@ def render_voronoi(groupings):
 
     return to_render
 
-
-x = 200
-results = lloyds_algorithm(x, x, 20, ramanujans_ellipse_arc)
-render_voronoi(results).show()
+if __name__ == '__main__' :
+    x = 500
+    results = lloyds_algorithm(x, x, 20, manhattan_distance)
+    render_voronoi(results).show()
