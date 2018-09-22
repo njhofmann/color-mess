@@ -15,7 +15,7 @@ To display a gradient in the desired mode, set the optional 'mode' parameter to 
 
 
 def random_colors():
-    return RGB.n_random_rbgs(random.randint(2, 5))
+    return RGB.n_random_rbg(random.randint(2, 5))
 
 
 def star(image, coordinates, cur_color):

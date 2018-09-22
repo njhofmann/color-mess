@@ -10,16 +10,26 @@ ref_x = 95.047
 ref_y = 100
 ref_z = 108.883
 
-# If a color space is to output a decimal, determines to what place that output should be to at max
-round_to = 4
-min_value = 0
+round_to = 4 # If a color space is to output a decimal, determines to what place that output should be to at max
+min_value = 0  # Minimum value for any color component, including alpha.
 rgb_max_value = 255
-alpha_max = 100
+alpha_max = 100  # Default and maximum alpha value
 
 
 class RGB:
+    """
+    Represents a color in the RGB space.
+    """
 
-    def __init__(self, red, green, blue, alpha=alpha_max):
+    def __init__(self, red: int, green: int, blue: int, alpha: int =alpha_max):
+        """
+        Constructs a RGB object from a given red, green, and blue (and optional alpha) components.
+        :param red: red value to set for this RGB
+        :param green: green value for this RGB
+        :param blue: blue value for this RGB
+        :param alpha: optional alpha composite value for this RGB object
+        :raise: if any of the given values are outside their respective ranges
+        """
         if not (min_value <= red <= rgb_max_value):
             raise ValueError('Red value must be in range [0, 255]!')
         elif not (min_value <= green <= rgb_max_value):
@@ -35,18 +45,32 @@ class RGB:
         self.alpha = alpha
 
     def output(self):
+        """
+        Returns the individual red, green, and blue components of this RGB as a tuple - rounded to nearest int.
+        :return: tuple of this RGB's individual components (minus alpha)
+        """
         red = round(self.red)
         green = round(self.green)
         blue = round(self.blue)
         return red, green, blue
 
     def output_as_rgba(self):
+        """
+        Returns the individual red, green, blue, and alpha components of this RGB as a tuple - rounded to nearest int.
+        :return: tuple of this RGB's individual components (with alpha)
+        """
         red = round(self.red)
         green = round(self.green)
         blue = round(self.blue)
         return red, green, blue, self.alpha
 
     def same_color(self, other):
+        """
+        Returns if this RGB represents the same color as another given RGB, HSV, or LAB object.
+        :param other: other color to compare to
+        :return: if this color and given color are the same
+        :raise: if given input is not of the type RGB, HSV, or LAB
+        """
         def same_attributes(temp):
             return self.output() == temp.output()
 
@@ -62,6 +86,10 @@ class RGB:
             raise TypeError('Given input isn\'t a color of type RGb, HSV, or LAB!')
 
     def to_hsv(self):
+        """
+        Converts this RGB to an equivalent HSV object representing the same color.
+        :return: HSV object representing same color as this RGB
+        """
         red = self.red / 255
         green = self.green / 255
         blue = self.blue / 255
@@ -90,6 +118,10 @@ class RGB:
         return to_return
 
     def to_lab(self):
+        """
+        Converts this RGB to an equivalent LAB object representing the same color.
+        :return: LAB object representing same color as this RGB
+        """
         red = self.red / 255.0
         green = self.green / 255.0
         blue = self.blue / 255.0
@@ -136,15 +168,25 @@ class RGB:
 
     @staticmethod
     def random_rgb():
+        """
+        Creates a RGB object representing a random color
+        :return: random RGB object
+        """
         red = random.randint(min_value, rgb_max_value)
         green = random.randint(min_value, rgb_max_value)
         blue = random.randint(min_value, rgb_max_value)
         return RGB(red, green, blue)
 
     @staticmethod
-    def n_random_rbgs(n):
-        if n < 2:
-            raise ValueError('n must be >= 2!')
+    def n_random_rbg(n=random.randint(3, 8)):
+        """
+        Returns a list of n randomly generated RGB objects.
+        :param n: number of RGB objects to create
+        :return: list of n random RGB objects
+        :raise: if given n is less than 1
+        """
+        if n < 1:
+            raise ValueError('n must be >= 1!')
 
         to_return = []
         for i in range(n):
@@ -153,7 +195,13 @@ class RGB:
 
     @staticmethod
     def n_random_rgba(n):
-        rgbas = RGB.n_random_rbgs(n)
+        """
+        Returns a list of n randomly generated RGB objects with random alpha values as well.
+        :param n: number of RGB objects to create
+        :return: list of n random RGB objects
+        :raise: if given n is less than 1
+        """
+        rgbas = RGB.n_random_rbg(n)
         cur_alpha = alpha_max
         increment = cur_alpha / (n - 1)
 
@@ -166,12 +214,22 @@ class RGB:
         return rgbas
 
 
-
 class HSV:
+    """
+    Represents a color in the HSV color space.
+    """
     max_hue = 360
     max_sv = 100
 
-    def __init__(self, hue, saturation, value, alpha=alpha_max):
+    def __init__(self, hue: int, saturation: int, value:int , alpha: int =alpha_max):
+        """
+        Creates a HSV object from a given hue, saturation, and value (and optional alpha composite) values.
+        :param hue: hue value for this HSV object
+        :param saturation: saturation value for this HSV object
+        :param value: value value for this HSV object
+        :param alpha: optional alpha composite value for this HSV object
+        :raise: if any of the given values are outside their respective ranges
+        """
         if not (min_value <= hue <= HSV.max_hue):
             raise ValueError('Hue must be in range [0, 360]')
         elif not (min_value <= saturation <= HSV.max_sv):
@@ -181,7 +239,7 @@ class HSV:
         elif not (min_value <= alpha <= alpha_max):
             raise ValueError('Alpha value must be in range [0, 1]!')
 
-        # For testing purposes due to information lose when converting to other color formats
+        # In place due to information lose when converting to other color formats
         if hue == 360:  #
             self.hue = 0
         else:
@@ -192,18 +250,33 @@ class HSV:
         self.alpha = alpha
 
     def output(self):
+        """
+        Returns the individual hue, saturation, and value components of this HSV as a tuple - rounded to nearest int.
+        :return: tuple of this HSV's individual components (minus alpha)
+        """
         hue = round(self.hue)
         saturation = round(self.saturation)
         value = round(self.value)
         return hue, saturation, value
 
     def output_to_string(self):
+        """
+        Returns the individual hue, saturation, and value components of this HSV as a formatted string - rounded to
+        nearest int. Meant to be used with the extra HSV string parameter for RGB in PILLOW.
+        :return: string of this HSV's individual components (minus alpha)
+        """
         hue = round(self.hue, round_to)
         saturation = round(self.saturation, round_to)
         value = round(self.value, round_to)
         return f'hsv({hue}, {saturation}%, {value}%)'
 
     def same_color(self, other):
+        """
+        Returns if this HSV represents the same color as another given RGB, HSV, or LAB object.
+        :param other: other color to compare to
+        :return: if this color and given color are the same
+        :raise: if given input is not of the type RGB, HSV, or LAB
+        """
         def same_attributes(temp):
             a = self.output()
             b = temp.output()
@@ -227,6 +300,10 @@ class HSV:
             raise TypeError('Given input isn\'t a color of type RGB, HSV, or LAB!')
 
     def to_rgb(self):
+        """
+        Converts this HSV to an equivalent RGB object representing the same color.
+        :return: RGB object representing same color as this HSV
+        """
         hue = self.hue
         saturation = self.saturation / 100
         value = self.value / 100
@@ -270,12 +347,20 @@ class HSV:
         return RGB(red, green, blue, self.alpha)
 
     def to_lab(self):
+        """
+        Converts this HSV to an equivalent LAB object representing the same color.
+        :return: LAB object representing same color as this HSV
+        """
         rgb = self.to_rgb()
         to_return = rgb.to_lab()
         return to_return
 
     @staticmethod
     def random_hsv():
+        """
+        Creates a HSV object representing a random color
+        :return: random HSV object
+        """
         hue = random.randint(min_value, HSV.max_hue)
         saturation = random.randint(min_value, HSV.max_sv)
         value = random.randint(min_value, HSV.max_sv)
@@ -283,9 +368,20 @@ class HSV:
 
 
 class LAB:
+    """
+    Represents a color in the LAB color space.
+    """
     max_light = 100
 
-    def __init__(self, light, a, b, alpha=alpha_max):
+    def __init__(self, light: int, a: int, b: int, alpha: int =alpha_max):
+        """
+
+        :param light: light value for this LAB
+        :param a: a value for this lab
+        :param b: b value for this lab
+        :param alpha: optional alpha composite value for this LAB
+        :raise: if any of the given values are outside their respective ranges
+        """
         if not (min_value <= light <= LAB.max_light):
             raise ValueError('Light must in range [0, 100]!')
         elif not (min_value <= alpha <= alpha_max):
@@ -297,12 +393,22 @@ class LAB:
         self.alpha = alpha
 
     def output(self):
+        """
+        Returns the individual light, a, and b components of this LAB as a tuple - rounded to nearest int.
+        :return: tuple of this LAB's individual components (minus alpha)
+        """
         light = round(self.light)
         a = round(self.a)
         b = round(self.b)
         return light, a, b
 
     def same_color(self, other):
+        """
+        Returns if this LAB represents the same color as another given RGB, HSV, or LAB object.
+        :param other: other color to compare to
+        :return: if this color and given color are the same
+        :raise: if given input is not of the type RGB, HSV, or LAB
+        """
         def same_attributes(temp):
             return self.output() == temp.output()
 
@@ -318,6 +424,10 @@ class LAB:
             raise TypeError('Given input isn\'t a color of type RGB, HSV, or LAB!')
 
     def to_rgb(self):
+        """
+        Converts this LAB to an equivalent RGB object representing the same color.
+        :return: RGB object representing same color as this LAB
+        """
         y = (self.light + 16) / 116
         x = (self.a / 500) + y
         z = y - (self.b / 200)
@@ -344,6 +454,11 @@ class LAB:
         blue = (x * .0556434) + (y * -.2040259) + (z * 1.0572252)
 
         def rgb_transform(var):
+            """
+
+            :param var:
+            :return:
+            """
             if var > .0031308:
                 var = 1.055 * (var ** (1 / 2.4)) - .055
             else:
@@ -375,12 +490,20 @@ class LAB:
         return RGB(red, green, blue, self.alpha)
 
     def to_hsv(self):
+        """
+        Converts this LAB to an equivalent HSV object representing the same color.
+        :return: HSV object representing same color as this LAB
+        """
         rgb = self.to_rgb()
         to_return = rgb.to_hsv()
         return to_return
 
     @staticmethod
     def random_lab():
+        """
+        Creates a LAB object representing a random color
+        :return: random LAB object
+        """
         a_b_range = 128
         light = random.randint(LAB.min_light, LAB.max_light)
         a = random.randint(-a_b_range, a_b_range)

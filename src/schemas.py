@@ -1,5 +1,14 @@
 from PIL import Image, ImageDraw
-from src.colormodels import RGB, HSV
+from colormodels import RGB, HSV
+import random
+
+
+def random_number_of_colors():
+    """
+    Returns a random number of colors to produce from a preselected range.
+    :return:
+    """
+    return random.randint(3, 6)
 
 
 def n_colors_over_saturation_range(starting_color, n, saturation):
@@ -30,7 +39,15 @@ def n_colors_over_value_range(starting_color, n, value):
     return results
 
 
-def n_analogous_colors_over_x(starting_color, n, x):
+def n_similar_colors(starting_color=RGB.random_rgb(), n=random_number_of_colors(), x=random.randint(20, 60)):
+    """
+    Returns a list of n colors 'similar' to each other, or n colors even spaced out over the hue scale in the HSV
+    color space, starting from a given RGB color.
+    :param starting_color: color to start from
+    :param n: number of colors to produce
+    :param x: range of hue to make colors from
+    :return: list of n similar colors
+    """
     starting_color = starting_color.to_hsv()
     hue = starting_color.hue
     start = (hue - x) % 360
@@ -51,7 +68,13 @@ def n_analogous_colors_over_x(starting_color, n, x):
     return results
 
 
-def n_evenly_spaced_colors(starting_color, n):
+def n_evenly_spaced_colors(starting_color=RGB.random_rgb(), n=random_number_of_colors()):
+    """
+    Returns a list of n colors evenly spaced out across the hue scale in the HSV color space from a given RGB color.
+    :param starting_color: color to start from
+    :param n: number of colors to include
+    :return:
+    """
     results = [starting_color]
     starting_color = starting_color.to_hsv()
     increment = 360 / n
@@ -66,12 +89,21 @@ def n_evenly_spaced_colors(starting_color, n):
     return results
 
 
-def view_schema(clrs):
+def view_schema(colors):
+    """
+    Helper method for viewing schemas
+    :param colors: list of colors to view
+    :return: None
+    """
     var = 100
-    img = Image.new('RGB', (len(clrs) * var, var))
+    img = Image.new('RGB', (len(colors) * var, var))
     draw = ImageDraw.Draw(img)
 
-    for idx, color in enumerate(clrs):
+    for idx, color in enumerate(colors):
         draw.rectangle([idx * var, 0, (idx + 1) * var, var], fill=color.output())
 
     img.show()
+
+
+if __name__ == '__main__':
+    view_schema(n_evenly_spaced_colors())
