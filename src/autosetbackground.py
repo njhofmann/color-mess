@@ -1,7 +1,7 @@
 from backgrounds import gradient_shifts, granite, regular_shape, straight_granite, plaid, rotated_diamond
 from gradients import star_gradient, rectangle_gradient, even_diamond_gradient, diamond_gradient, \
     double_diamond_gradient, ellipse_gradient, line_gradient, lopsided_arced_rect_gradient, even_arced_rect_gradient
-from schemas import n_evenly_spaced_colors, n_similar_colors
+from schemas import n_evenly_spaced_colors, n_similar_colors, n_colors_over_saturation_range, n_colors_over_value_range
 from colormodels import RGB
 import random
 import ctypes
@@ -19,7 +19,8 @@ def create_and_set_background():
                             ellipse_gradient, diamond_gradient, line_gradient, even_arced_rect_gradient,
                            lopsided_arced_rect_gradient))
 
-    color_options = random.choice((n_evenly_spaced_colors, n_similar_colors, RGB.n_random_rbg))
+    color_options = random.choice((n_evenly_spaced_colors, n_similar_colors, RGB.n_random_rbg,
+                                   n_colors_over_saturation_range, n_colors_over_value_range))
     colors = color_options()
 
     img = shape(width, height, colors)

@@ -8,38 +8,70 @@ def random_number_of_colors():
     Returns a random number of colors to produce from a preselected range.
     :return:
     """
-    return random.randint(3, 6)
+    return random.randint(3, 8)
 
 
-def n_colors_over_saturation_range(starting_color, n, saturation):
+def random_range():
+    """
+    Returns a random number from a preselected range to use as a range for value, hue, or saturation.
+    :return:
+    """
+    return random.randint(30, 70)
+
+
+def n_colors_over_saturation_range(starting_color=RGB.random_rgb(), n=random_number_of_colors(), saturation=random_range()):
+    """
+    Returns n colors with same hue and value differing over a given saturation range.
+    :param starting_color: color to start from
+    :param n: number of colors to produce
+    :param saturation: range of saturation to make colors from
+    :return: list of colors over saturation range
+    """
+    if n < 2:
+        raise ValueError("n must be >= 2")
+    elif saturation > 100:
+        raise ValueError('Saturation range can\'t be > 100!')
+
     starting_color = starting_color.to_hsv()
 
     increment = saturation / (n - 1)
-    cur_sat = starting_color.saturation
+    cur_sat = (HSV.max_sv / 2) - (saturation / 2)
     results = []
     for idx in range(n):
         to_add = HSV(starting_color.hue, starting_color.saturation, cur_sat)
         results.append(to_add.to_rgb())
-        cur_sat = (cur_sat + increment) % 100
+        cur_sat += increment
 
     return results
 
 
-def n_colors_over_value_range(starting_color, n, value):
+def n_colors_over_value_range(starting_color=RGB.random_rgb(), n=random_number_of_colors(), value=random_range()):
+    """
+    Returns n colors with same hue and saturation differing over a given value range.
+    :param starting_color: color to start from
+    :param n: number of colors to produce
+    :param value: range of value to make colors from
+    :return: list of colors of value range
+    """
+    if n < 2:
+        raise ValueError("n must be >= 2")
+    elif value > 100:
+        raise ValueError('Saturation range can\'t be > 100!')
+
     starting_color = starting_color.to_hsv()
 
     increment = value / (n - 1)
-    cur_value = starting_color.value
+    cur_value = (HSV.max_sv / 2) - (value / 2)
     results = []
     for idx in range(n):
         to_add = HSV(starting_color.hue, starting_color.saturation, cur_value)
         results.append(to_add.to_rgb())
-        cur_value = (cur_value + increment) % 100
+        cur_value += increment
 
     return results
 
 
-def n_similar_colors(starting_color=RGB.random_rgb(), n=random_number_of_colors(), x=random.randint(20, 60)):
+def n_similar_colors(starting_color=RGB.random_rgb(), n=random_number_of_colors(), x=random_range()):
     """
     Returns a list of n colors 'similar' to each other, or n colors even spaced out over the hue scale in the HSV
     color space, starting from a given RGB color.
@@ -106,4 +138,4 @@ def view_schema(colors):
 
 
 if __name__ == '__main__':
-    view_schema(n_evenly_spaced_colors())
+    view_schema(n_colors_over_saturation_range())
