@@ -118,7 +118,7 @@ class VoronoiDiagram:
         new_feature_points = old_feature_points
 
         avg_dist_moved = 2
-        while avg_dist_moved > .5:  # Adjust me!
+        while avg_dist_moved > 1.9:  # Adjust me!
             self.find_groupings()
 
             old_feature_points = new_feature_points

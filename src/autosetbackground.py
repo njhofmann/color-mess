@@ -5,6 +5,7 @@ from schemas import n_evenly_spaced_colors, n_similar_colors, n_colors_over_satu
 from colormodels import RGB
 import random
 import ctypes
+import os
 
 
 def create_and_set_background():
@@ -28,7 +29,8 @@ def create_and_set_background():
     if img.mode == 'HSV': # Color mode must be RGB as not every file type supports HSV or other color spaces
         img = img.convert('RGB')
 
-    filename = 'C:\\Users\\inate\\PycharmProjects\\color-mess\\resources\\wallpaper.bmp'  # File path from program root
+    rootpath = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    filename = os.path.join(rootpath, 'resources\wallpaper.bmp')
     img.save(filename, 'BMP')
     SPI_SETDESKWALLPAPER = 20
     ctypes.windll.user32.SystemParametersInfoW(SPI_SETDESKWALLPAPER, 0, filename, 3)
