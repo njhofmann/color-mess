@@ -30,7 +30,7 @@ def create_and_set_background():
         img = img.convert('RGB')
 
     rootpath = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    filename = os.path.join(rootpath, 'resources\wallpaper.bmp')
+    filename = os.path.join(rootpath, 'resources\my_wallpaper.bmp')
     img.save(filename, 'BMP')
     SPI_SETDESKWALLPAPER = 20
     ctypes.windll.user32.SystemParametersInfoW(SPI_SETDESKWALLPAPER, 0, filename, 3)

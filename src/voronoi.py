@@ -117,8 +117,9 @@ class VoronoiDiagram:
         old_feature_points = self.feature_points
         new_feature_points = old_feature_points
 
-        avg_dist_moved = 2
-        while avg_dist_moved > 1.9:  # Adjust me!
+        avg_dist_moved = 100
+        while avg_dist_moved > 20:  # Adjust me! 10 for ellipse arc, 1.9 otherwise
+            print(avg_dist_moved)
             self.find_groupings()
 
             old_feature_points = new_feature_points
@@ -142,7 +143,6 @@ class VoronoiDiagram:
                 avg_dist_moved += euclidean_distance(xy[0], xy[1], old_feature_points_coor[0],
                                                      old_feature_points_coor[1])
                 new_feature_points.append(xy)
-                # print(avg_dist_moved)
 
             avg_dist_moved /= len(new_feature_points)
             self.feature_points = new_feature_points
