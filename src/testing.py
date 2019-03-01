@@ -9,61 +9,32 @@ from voronoi import VoronoiDiagram, euclidean_distance, ellipse_arc_distance, ma
 import os
 
 
-def colored_voronoi_diagram(x, y, num_of_points=random.randint(5,20)):
-    colors = n_evenly_spaced_colors(RGB.random_rgb(), num_of_points)
-    diagram = VoronoiDiagram(x, y, num_of_points, ellipse_arc_distance)
-    diagram.optimize()
+flowers = Image.open('toucan.jpg')
+width, height = flowers.size
+dummy_img = Image.new('RGB', (width, height))
+draw = ImageDraw.Draw(dummy_img)
+num_of_points = round((width * height) / 100)
+vor = VoronoiDiagram(width, height, num_of_points)
+vor.optimize()
 
-    img = Image.new('RGB', (x, y))
-    draw = ImageDraw.Draw(img)
+for group in vor.coor_groupings:
+    num_of_coors = len(group)
+    avg_red, avg_green, avg_blue = 0, 0, 0
+    for coor in group:
+        red, green, blue = flowers.getpixel(coor)
+        avg_red += red
+        avg_green += green
+        avg_blue += blue
 
-    for idx in range(num_of_points):
-        cur_color = colors[idx]
-        cur_set = diagram.coor_groupings[idx]
-        for point in cur_set:
-            draw.point(point, cur_color.output())
+    avg_red /= num_of_coors
+    avg_green /= num_of_coors
+    avg_blue /= num_of_coors
+    new_color = (round(avg_red), round(avg_green), round(avg_blue))
 
-    return img
+    for coor in group:
+        draw.point(coor, new_color)
 
+dummy_img.save('glass.bmp', 'BMP')
 
-def multi_circles(width, length, num_of_points=random.randint(3,7), num_of_colors=random.randint(4,10), optimize=False):
-    vrn = VoronoiDiagram(width, length, num_of_points, optimization_threshold=5)
-    if optimize:
-        vrn.optimize()
-    points = vrn.feature_points
-
-    points_to_corners = []
-    corners = [(0, 0), (width, length), (width, 0), (0, length)]
-    for corner in corners:
-        min_dist = None
-        for point in points:
-            cur_dist = euclidean_distance(point[0], point[1], corner[0], corner[1])
-            if min_dist is None:
-                min_dist = cur_dist
-            elif cur_dist < min_dist:
-                min_dist = cur_dist
-        points_to_corners.append(min_dist)
-    max_dist = math.ceil(max(points_to_corners))
-
-    colors = RGB.n_random_rbg(num_of_colors)
-    gradient = create_color_gradient(colors, max_dist)
-
-    img = Image.new('RGB', (width, length), gradient[-1])
-    draw = ImageDraw.Draw(img)
-    for idx in range(max_dist - 1, -1, -1):
-        cur_color = gradient[idx]
-        for point in points:
-            x = point[0]
-            y = point[1]
-            coors = (x - idx, y - idx, x + idx, y + idx)
-            draw.ellipse(coors, cur_color)
-
-    return img
-
-
-if __name__ == '__main__':
-    img = multi_circles(500, 500, optimize=True)
-    img.show()
-    img.save("5.bmp", 'BMP')
 
 

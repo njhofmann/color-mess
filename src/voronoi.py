@@ -49,17 +49,19 @@ class VoronoiDiagram:
     Represents the feature points, coordinate groupings, height, and width of a Voronoi diagram.
     """
 
-    def __init__(self, width, height, number_of_feature_points, distance=euclidean_distance):
+    def __init__(self, width, height, number_of_feature_points, optimization_threshold=1, distance=euclidean_distance):
         """
         Creates a Voronoi diagram from a given width, height, number of feature points, and distance algorithm.
         :param width: max width of this Voronoi diagram
         :param height: max height of this Voronoi diagram
         :param number_of_feature_points: number of feature points this Voronoi diagram will always have
+        :param optimization_threshold: stopping threshold to dictate when to stop optimization, lower value = closer clusters
         :param distance: distance algorithm to use for computing the distance between points and feature points
         """
         self.width = width
         self.height = height
         self.distance = distance
+        self.optimization_threshold = optimization_threshold
 
         if number_of_feature_points < 1:
             raise ValueError('Number of feature points must be >= 1')
@@ -117,8 +119,8 @@ class VoronoiDiagram:
         old_feature_points = self.feature_points
         new_feature_points = old_feature_points
 
-        avg_dist_moved = 100
-        while avg_dist_moved > 20:  # Adjust me! 10 for ellipse arc, 1.9 otherwise
+        avg_dist_moved = None
+        while avg_dist_moved is None or avg_dist_moved > self.optimization_threshold:  # Adjust me! 10 for ellipse arc, 1.9 otherwise
             print(avg_dist_moved)
             self.find_groupings()
 
@@ -127,22 +129,23 @@ class VoronoiDiagram:
 
             avg_dist_moved = 0
             for idx, group in enumerate(self.coor_groupings):
-                cum_x = 0
-                cum_y = 0
+                if len(group) > 0:
+                    cum_x = 0
+                    cum_y = 0
 
-                for coor in group:
-                    cum_x += coor[0]
-                    cum_y += coor[1]
+                    for coor in group:
+                        cum_x += coor[0]
+                        cum_y += coor[1]
 
-                cum_x /= len(group)
-                cum_y /= len(group)
+                    cum_x /= len(group)
+                    cum_y /= len(group)
 
-                xy = (cum_x, cum_y)
+                    xy = (cum_x, cum_y)
 
-                old_feature_points_coor = old_feature_points[idx]
-                avg_dist_moved += euclidean_distance(xy[0], xy[1], old_feature_points_coor[0],
-                                                     old_feature_points_coor[1])
-                new_feature_points.append(xy)
+                    old_feature_points_coor = old_feature_points[idx]
+                    avg_dist_moved += euclidean_distance(xy[0], xy[1], old_feature_points_coor[0],
+                                                         old_feature_points_coor[1])
+                    new_feature_points.append(xy)
 
             avg_dist_moved /= len(new_feature_points)
             self.feature_points = new_feature_points
