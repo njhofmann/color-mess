@@ -6,3 +6,4 @@ A collection of various utility classes and functions related to basic image man
   * Gradient creation for any number of colors.
   * Extensible method for creating custom image gradients modelled around a predefined shape.
   * Voronoi diagram creation and iteration (using Lloyd's algorithm) using several kinds of distance functions. 
+  * Frosted glass and other filters built atop Voronoi diagram generation.

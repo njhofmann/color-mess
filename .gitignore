@@ -1,3 +1,6 @@
 /venv
 .idea/
 src/_pycache_/
+resources/
+src/toucan.jpg
+src/glass.bmp
