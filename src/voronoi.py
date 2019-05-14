@@ -5,6 +5,13 @@ import math
 import sys
 
 
+def radivojac_distance(x0, y0, x1, y1):
+    unnormalized = euclidean_distance(x0, y0, x1, y1)
+    x_value = max(x0, x1, abs(x0 - x1))
+    y_value = max(y0, y1, abs(y0 - y1))
+    return unnormalized / (x_value + y_value)
+
+
 def euclidean_distance(x0, y0, x1, y1):
     """
     Regular Euclidean distance algorithm.
@@ -66,7 +73,7 @@ class VoronoiDiagram:
         if number_of_feature_points < 1:
             raise ValueError('Number of feature points must be >= 1')
 
-        self.feature_points = list()
+        self.feature_points = set()
         for point in range(number_of_feature_points):
             point_created = False
 
@@ -76,7 +83,7 @@ class VoronoiDiagram:
                 xy = (new_x, new_y)
 
                 if xy not in self.feature_points:
-                    self.feature_points.append(xy)
+                    self.feature_points.add(xy)
                     point_created = True
 
         self.coor_groupings = []
@@ -88,15 +95,11 @@ class VoronoiDiagram:
         :return: None
         """
 
-        feature_points_and_coor_groupings = dict.fromkeys(self.feature_points)
-
-        for key in feature_points_and_coor_groupings:
-            feature_points_and_coor_groupings[key] = []
+        feature_points_and_coor_groupings = dict.fromkeys(self.feature_points, list())
 
         for row in range(self.height):
             for column in range(self.width):
                 cur_point = (column, row)
-
                 cur_closest_feature_point = self.feature_points[0]
                 cur_closest_feature_point_dist = sys.maxsize
 
@@ -129,7 +132,8 @@ class VoronoiDiagram:
 
             avg_dist_moved = 0
             for idx, group in enumerate(self.coor_groupings):
-                if len(group) > 0:
+                group_length = len(group)
+                if group_length > 0:
                     cum_x = 0
                     cum_y = 0
 
@@ -137,8 +141,8 @@ class VoronoiDiagram:
                         cum_x += coor[0]
                         cum_y += coor[1]
 
-                    cum_x /= len(group)
-                    cum_y /= len(group)
+                    cum_x /= group_length
+                    cum_y /= group_length
 
                     xy = (cum_x, cum_y)
 
@@ -171,7 +175,7 @@ class VoronoiDiagram:
 
 
 if __name__ == '__main__':
-    x = 500
-    diagram = VoronoiDiagram(x, x, 10, ellipse_arc_distance)
+    x = 200
+    diagram = VoronoiDiagram(x, x, 20, distance=radivojac_distance, optimization_threshold=2)
     diagram.optimize()
     diagram.view()
