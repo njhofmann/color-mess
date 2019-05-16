@@ -3,6 +3,7 @@ import random
 from src.colormodels import RGB
 import math
 import sys
+from collections import deque
 
 
 def radivojac_distance(x0, y0, x1, y1):
@@ -56,7 +57,7 @@ class VoronoiDiagram:
     Represents the feature points, coordinate groupings, height, and width of a Voronoi diagram.
     """
 
-    def __init__(self, width, height, number_of_feature_points, optimization_threshold=1, distance=euclidean_distance):
+    def __init__(self, width, height, number_of_feature_points, optimization_threshold=2, distance=euclidean_distance):
         """
         Creates a Voronoi diagram from a given width, height, number of feature points, and distance algorithm.
         :param width: max width of this Voronoi diagram
@@ -69,24 +70,19 @@ class VoronoiDiagram:
         self.height = height
         self.distance = distance
         self.optimization_threshold = optimization_threshold
+        self.coor_groupings = []
+        self.feature_points = set()
 
         if number_of_feature_points < 1:
             raise ValueError('Number of feature points must be >= 1')
 
-        self.feature_points = set()
-        for point in range(number_of_feature_points):
-            point_created = False
-
-            while not point_created:  # Don't want duplicate feature points
-                new_x = random.randint(0, width)
-                new_y = random.randint(0, height)
-                xy = (new_x, new_y)
-
-                if xy not in self.feature_points:
-                    self.feature_points.add(xy)
-                    point_created = True
-
-        self.coor_groupings = []
+        while len(self.feature_points) != number_of_feature_points:
+            new_x = random.randint(0, width)
+            new_y = random.randint(0, height)
+            xy = (new_x, new_y)
+            if xy not in self.feature_points:
+                self.feature_points.add(xy)
+        self.feature_points = list(self.feature_points)
         self.find_groupings()
 
     def find_groupings(self):
@@ -95,21 +91,17 @@ class VoronoiDiagram:
         :return: None
         """
 
-        feature_points_and_coor_groupings = dict.fromkeys(self.feature_points, list())
+        feature_points_and_coor_groupings = dict()
+        for feature_point in self.feature_points:
+            feature_points_and_coor_groupings[feature_point] = deque()
 
-        for row in range(self.height):
-            for column in range(self.width):
-                cur_point = (column, row)
-                cur_closest_feature_point = self.feature_points[0]
-                cur_closest_feature_point_dist = sys.maxsize
-
-                for feature_point in feature_points_and_coor_groupings.keys():
-                    cur_dist = self.distance(cur_point[0], cur_point[1], feature_point[0], feature_point[1])
-                    if cur_dist < cur_closest_feature_point_dist:
-                        cur_closest_feature_point_dist = cur_dist
-                        cur_closest_feature_point = feature_point
-
-                feature_points_and_coor_groupings.get(cur_closest_feature_point).append(cur_point)
+        for y in range(self.height):
+            print(y)
+            for x in range(self.width):
+                feature_point_dists = [(feature_point, self.distance(x, y, feature_point[0], feature_point[1]))
+                                       for feature_point in self.feature_points]
+                closest = min(feature_point_dists, key=lambda x: x[1])
+                feature_points_and_coor_groupings.get(closest[0]).append((x,y))
 
         self.coor_groupings = list(feature_points_and_coor_groupings.values())
 
@@ -130,28 +122,17 @@ class VoronoiDiagram:
             old_feature_points = new_feature_points
             new_feature_points = []
 
-            avg_dist_moved = 0
+            avg_dist_moved = []
             for idx, group in enumerate(self.coor_groupings):
                 group_length = len(group)
                 if group_length > 0:
-                    cum_x = 0
-                    cum_y = 0
-
-                    for coor in group:
-                        cum_x += coor[0]
-                        cum_y += coor[1]
-
-                    cum_x /= group_length
-                    cum_y /= group_length
-
-                    xy = (cum_x, cum_y)
-
+                    xy = tuple([sum(x) / group_length for x in zip(*group)])
                     old_feature_points_coor = old_feature_points[idx]
-                    avg_dist_moved += euclidean_distance(xy[0], xy[1], old_feature_points_coor[0],
-                                                         old_feature_points_coor[1])
+                    avg_dist_moved.append(euclidean_distance(xy[0], xy[1], old_feature_points_coor[0],
+                                                         old_feature_points_coor[1]))
                     new_feature_points.append(xy)
 
-            avg_dist_moved /= len(new_feature_points)
+            avg_dist_moved = sum(avg_dist_moved) / len(new_feature_points)
             self.feature_points = new_feature_points
 
     def view(self, display_feature_points=True):
@@ -161,7 +142,6 @@ class VoronoiDiagram:
         """
         to_render = Image.new('RGB', (self.width, self.height))
         to_draw = ImageDraw.Draw(to_render)
-
         for idx, group in enumerate(self.coor_groupings):
             cur_color = RGB.random_rgb().output()
             for coor in group:
@@ -175,7 +155,7 @@ class VoronoiDiagram:
 
 
 if __name__ == '__main__':
-    x = 200
-    diagram = VoronoiDiagram(x, x, 20, distance=radivojac_distance, optimization_threshold=2)
+    x = 1000
+    diagram = VoronoiDiagram(x, x, 20, distance=euclidean_distance, optimization_threshold=2)
     diagram.optimize()
     diagram.view()

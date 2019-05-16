@@ -41,6 +41,40 @@ def multi_circles(width, length, num_of_points=random.randint(3,7), num_of_color
     return img
 
 
+def frosted_glass(img_path, reduced_height=500):
+    image = Image.open(img_path)
+    width, height = image.size
+
+    resize_height = reduced_height
+    resize_width = round(resize_height * (width / height))
+    image = image.resize((resize_width, resize_height))
+
+    dummy_img = Image.new('RGB', (resize_width, resize_height))
+    draw = ImageDraw.Draw(dummy_img)
+    num_of_points = round((resize_width * resize_width) / 100)
+    vor = VoronoiDiagram(resize_width, resize_height, num_of_points)
+    vor.optimize()
+
+    for group in vor.coor_groupings:
+        num_of_coors = max(1, len(group))
+        avg_red, avg_green, avg_blue = 0, 0, 0
+        for coor in group:
+            red, green, blue = image.getpixel(coor)
+            avg_red += red
+            avg_green += green
+            avg_blue += blue
+
+        avg_red /= num_of_coors
+        avg_green /= num_of_coors
+        avg_blue /= num_of_coors
+        new_color = (round(avg_red), round(avg_green), round(avg_blue))
+
+        for coor in group:
+            draw.point(coor, new_color)
+
+    return dummy_img
+
+
 if __name__ == '__main__':
     img = multi_circles(500, 500, optimize=True)
     img.show()
