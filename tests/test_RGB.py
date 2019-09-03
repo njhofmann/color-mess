@@ -1,5 +1,5 @@
 from unittest import TestCase
-from src.colormodels import RGB
+from src.color_models import RGB
 
 
 class TestRGB(TestCase):

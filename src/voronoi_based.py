@@ -1,13 +1,16 @@
-from voronoi import  VoronoiDiagram, euclidean_distance
-from colormodels import RGB
+from voronoi import VoronoiDiagram, euclidean_distance
+from color_models import RGB
 import math
 import random
 from PIL import Image, ImageDraw
 from gradients import create_color_gradient
 
+"""
+Methods based off of Voronoi diagram generation.
+"""
 
 def multi_circles(width, length, num_of_points=random.randint(3,7), num_of_colors=random.randint(4,10), optimize=False):
-    vrn = VoronoiDiagram(width, length, num_of_points, optimization_threshold=5)
+    vrn = VoronoiDiagram(width, length, num_of_points)
     if optimize:
         vrn.optimize()
     points = vrn.feature_points
@@ -76,6 +79,6 @@ def frosted_glass(img_path, reduced_height=500):
 
 
 if __name__ == '__main__':
-    img = multi_circles(500, 500, optimize=True)
+    img = multi_circles(1080, 1920, num_of_points=10, num_of_colors=3, optimize=True)
     img.show()
-    img.save("5.bmp", 'BMP')
+    img.save("test.bmp", 'BMP')

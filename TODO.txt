@@ -1,5 +1,10 @@
--Documentation for existing classes and methods
--Color scheme generation
--Create more backgrounds
--Valid height and width method
--Proper overlay for regular shapes with rotations
+-Main function & arg parser to delegate to methods
+-Documentation
+  -Type hints
+  -Documentation for each python file
+  -Modularization, put only useable methods and classes in __init__
+  -
+
+-Voronoi medians?
+-Delaunay triangulation?
+-How to implement standard parameters?

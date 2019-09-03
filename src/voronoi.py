@@ -1,10 +1,13 @@
 from PIL import ImageDraw, Image
 import random
-from src.colormodels import RGB
+from src.color_models import RGB
 import math
 import sys
 from collections import deque
 
+"""
+Implementation of a Voronoi diagram generator, with different distance functions
+"""
 
 def radivojac_distance(x0, y0, x1, y1):
     unnormalized = euclidean_distance(x0, y0, x1, y1)
@@ -96,7 +99,6 @@ class VoronoiDiagram:
             feature_points_and_coor_groupings[feature_point] = deque()
 
         for y in range(self.height):
-            print(y)
             for x in range(self.width):
                 feature_point_dists = [(feature_point, self.distance(x, y, feature_point[0], feature_point[1]))
                                        for feature_point in self.feature_points]
@@ -104,6 +106,9 @@ class VoronoiDiagram:
                 feature_points_and_coor_groupings.get(closest[0]).append((x,y))
 
         self.coor_groupings = list(feature_points_and_coor_groupings.values())
+
+    def find_groupings_by_fortune(self):
+        pass
 
     def optimize(self):
         """

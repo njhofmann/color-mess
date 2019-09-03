@@ -2,20 +2,29 @@ from PIL import Image, ImageDraw
 import copy
 import math
 import random
-from colormodels import RGB, HSV, LAB
+from color_models import RGB, HSV, LAB
 
 
-'''
+"""
+Collection of image generators based around applying color gradients to various shapes.
+"""
+
+"""
 Every gradient can be created in either the RGB, HSV, or LAB color spaces.
 To display a gradient in the desired mode, set the optional 'mode' parameter to the following, RGB by default:
 -RGB - 'rgb' 
 -HSV - 'hsv'
 -LAB - 'lab'
-'''
+"""
 
 
-def random_colors():
-    return RGB.n_random_rbg(random.randint(2, 5))
+def random_colors(max_n=5):
+    """
+    Returns n random RGB colors, where k is a random value between 2 and n.
+    :param max_n: max value of n
+    :return: k random RGB colors
+    """
+    return RGB.n_random_rbg(random.randint(2, max_n))
 
 
 def star(image, coordinates, cur_color):
@@ -135,7 +144,6 @@ def arced_rectangle(image, coordinates, cur_color, x_perc, y_perc):
 
     to_draw = ImageDraw.Draw(image)
     to_draw.polygon(xy=coors, fill=cur_color)
-
 
 
 def even_arced_rect(image, coordinates, cur_color):

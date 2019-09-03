@@ -1,19 +1,24 @@
 import random
 
+"""
+Set of colors models for the RGB, HSV, and LAB color spaces.
+"""
+
 '''
 The conversion between an RGB value to a LAB value is not one to one, each conversion requires an intermediary 
 transformation to the XYZ color space, the XYZ color space depends on a specific illumination with its own set of 
 reference values and transformation variables. This model is built using the D65/2° standard illumination. References
 values are given below, transformation variables are marked in the respective methods.
 '''
+
 ref_x = 95.047
 ref_y = 100
 ref_z = 108.883
 
-round_to = 4 # If a color space is to output a decimal, determines to what place that output should be to at max
-min_value = 0  # Minimum value for any color component, including alpha.
-rgb_max_value = 255
-alpha_max = 100  # Default and maximum alpha value
+ROUNDING_ERROR = 4  # If a color space is to output a decimal, determines to what place that output should be to at max
+MIN_VALUE = 0  # Minimum value for any color component, including alpha.
+MAX_RGB = 255
+MAX_ALPHA = 100  # Default and maximum alpha value
 
 
 class RGB:
@@ -21,7 +26,7 @@ class RGB:
     Represents a color in the RGB space.
     """
 
-    def __init__(self, red: int, green: int, blue: int, alpha: int =alpha_max):
+    def __init__(self, red: int, green: int, blue: int, alpha: int =MAX_ALPHA):
         """
         Constructs a RGB object from a given red, green, and blue (and optional alpha) components.
         :param red: red value to set for this RGB
@@ -30,13 +35,13 @@ class RGB:
         :param alpha: optional alpha composite value for this RGB object
         :raise: if any of the given values are outside their respective ranges
         """
-        if not (min_value <= red <= rgb_max_value):
+        if not (MIN_VALUE <= red <= MAX_RGB):
             raise ValueError('Red value must be in range [0, 255]!')
-        elif not (min_value <= green <= rgb_max_value):
+        elif not (MIN_VALUE <= green <= MAX_RGB):
             raise ValueError('Green value must be in range [0, 255]!')
-        elif not (min_value <= blue <= rgb_max_value):
+        elif not (MIN_VALUE <= blue <= MAX_RGB):
             raise ValueError('Blue value must be in range [0, 255]!')
-        elif not (min_value <= alpha <= alpha_max):
+        elif not (MIN_VALUE <= alpha <= MAX_ALPHA):
             raise ValueError('Alpha value must be in range [0, 100]!')
 
         self.red = red
@@ -172,9 +177,9 @@ class RGB:
         Creates a RGB object representing a random color
         :return: random RGB object
         """
-        red = random.randint(min_value, rgb_max_value)
-        green = random.randint(min_value, rgb_max_value)
-        blue = random.randint(min_value, rgb_max_value)
+        red = random.randint(MIN_VALUE, MAX_RGB)
+        green = random.randint(MIN_VALUE, MAX_RGB)
+        blue = random.randint(MIN_VALUE, MAX_RGB)
         return RGB(red, green, blue)
 
     @staticmethod
@@ -202,7 +207,7 @@ class RGB:
         :raise: if given n is less than 1
         """
         rgbas = RGB.n_random_rbg(n)
-        cur_alpha = alpha_max
+        cur_alpha = MAX_ALPHA
         increment = cur_alpha / (n - 1)
 
         for i in range(n):
@@ -221,7 +226,7 @@ class HSV:
     max_hue = 360
     max_sv = 100
 
-    def __init__(self, hue: int, saturation: int, value:int , alpha: int =alpha_max):
+    def __init__(self, hue: int, saturation: int, value:int, alpha: int =MAX_ALPHA):
         """
         Creates a HSV object from a given hue, saturation, and value (and optional alpha composite) values.
         :param hue: hue value for this HSV object
@@ -230,13 +235,13 @@ class HSV:
         :param alpha: optional alpha composite value for this HSV object
         :raise: if any of the given values are outside their respective ranges
         """
-        if not (min_value <= hue <= HSV.max_hue):
+        if not (MIN_VALUE <= hue <= HSV.max_hue):
             raise ValueError('Hue must be in range [0, 360]')
-        elif not (min_value <= saturation <= HSV.max_sv):
+        elif not (MIN_VALUE <= saturation <= HSV.max_sv):
             raise ValueError('Saturation must be in range [0, 100]!')
-        elif not (min_value <= value <= HSV.max_sv):
+        elif not (MIN_VALUE <= value <= HSV.max_sv):
             raise ValueError('Value must be in range [0, 100]!')
-        elif not (min_value <= alpha <= alpha_max):
+        elif not (MIN_VALUE <= alpha <= MAX_ALPHA):
             raise ValueError('Alpha value must be in range [0, 1]!')
 
         # In place due to information lose when converting to other color formats
@@ -265,9 +270,9 @@ class HSV:
         nearest int. Meant to be used with the extra HSV string parameter for RGB in PILLOW.
         :return: string of this HSV's individual components (minus alpha)
         """
-        hue = round(self.hue, round_to)
-        saturation = round(self.saturation, round_to)
-        value = round(self.value, round_to)
+        hue = round(self.hue, ROUNDING_ERROR)
+        saturation = round(self.saturation, ROUNDING_ERROR)
+        value = round(self.value, ROUNDING_ERROR)
         return f'hsv({hue}, {saturation}%, {value}%)'
 
     def same_color(self, other):
@@ -325,9 +330,9 @@ class HSV:
         else:
             r, g, b = c, 0, x
 
-        red = (r + m) * rgb_max_value
-        green = ((g + m) * rgb_max_value)
-        blue = ((b + m) * rgb_max_value)
+        red = (r + m) * MAX_RGB
+        green = ((g + m) * MAX_RGB)
+        blue = ((b + m) * MAX_RGB)
 
         if red > 255:
             red = 255
@@ -361,9 +366,9 @@ class HSV:
         Creates a HSV object representing a random color
         :return: random HSV object
         """
-        hue = random.randint(min_value, HSV.max_hue)
-        saturation = random.randint(min_value, HSV.max_sv)
-        value = random.randint(min_value, HSV.max_sv)
+        hue = random.randint(MIN_VALUE, HSV.max_hue)
+        saturation = random.randint(MIN_VALUE, HSV.max_sv)
+        value = random.randint(MIN_VALUE, HSV.max_sv)
         return HSV(hue, saturation, value)
 
 
@@ -373,7 +378,7 @@ class LAB:
     """
     max_light = 100
 
-    def __init__(self, light: int, a: int, b: int, alpha: int =alpha_max):
+    def __init__(self, light: int, a: int, b: int, alpha: int =MAX_ALPHA):
         """
 
         :param light: light value for this LAB
@@ -382,9 +387,9 @@ class LAB:
         :param alpha: optional alpha composite value for this LAB
         :raise: if any of the given values are outside their respective ranges
         """
-        if not (min_value <= light <= LAB.max_light):
+        if not (MIN_VALUE <= light <= LAB.max_light):
             raise ValueError('Light must in range [0, 100]!')
-        elif not (min_value <= alpha <= alpha_max):
+        elif not (MIN_VALUE <= alpha <= MAX_ALPHA):
             raise ValueError('Alpha value must be in range [0, 1]!')
 
         self.light = light
@@ -464,7 +469,7 @@ class LAB:
             else:
                 var *= 12.92
 
-            var *= rgb_max_value
+            var *= MAX_RGB
 
             return var
 
@@ -474,18 +479,18 @@ class LAB:
 
         if red <= 0:
             red = 0
-        elif rgb_max_value <= red:
-            red = rgb_max_value
+        elif MAX_RGB <= red:
+            red = MAX_RGB
 
         if green <= 0:
             green = 0
-        elif rgb_max_value <= green:
-            green = rgb_max_value
+        elif MAX_RGB <= green:
+            green = MAX_RGB
 
         if blue <= 0:
             blue = 0
-        elif rgb_max_value <= blue:
-            blue = rgb_max_value
+        elif MAX_RGB <= blue:
+            blue = MAX_RGB
 
         return RGB(red, green, blue, self.alpha)
 

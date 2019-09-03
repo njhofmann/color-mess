@@ -1,5 +1,5 @@
 from unittest import TestCase
-from src.colormodels import RGB, HSV, LAB
+from src.color_models import RGB, HSV, LAB
 
 
 class TestConversions(TestCase):

@@ -1,6 +1,10 @@
 from PIL import Image, ImageDraw
-from colormodels import RGB, HSV
+from color_models import RGB, HSV
 import random
+
+"""
+Collection of methods for generating appealing color schemas.
+"""
 
 
 def random_number_of_colors():

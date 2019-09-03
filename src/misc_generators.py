@@ -1,10 +1,14 @@
-from colormodels import RGB, HSV
+from color_models import RGB, HSV
 import gradients as grd
 from PIL import Image, ImageDraw
 import collections
 import random
 
-# List of graident shapes to use for image
+"""
+Collection of misc image generators.
+"""
+
+# List of gradient shapes to use for image
 shapes = (grd.diamond_gradient, grd.double_diamond_gradient, grd.star_gradient,
           grd.even_diamond_gradient, grd.ellipse_gradient, grd.rectangle_gradient)
 

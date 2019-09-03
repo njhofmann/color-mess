@@ -1,5 +1,5 @@
 from unittest import TestCase
-from src.colormodels import HSV
+from src.color_models import HSV
 
 
 class TestHSV(TestCase):
